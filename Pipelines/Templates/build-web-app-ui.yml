@@ -1,0 +1,66 @@
+parameters:
+- name: projects
+  type: string
+  default: '**/*.csproj'
+- name: feed
+  type: string
+- name: buildConfiguration
+  type: string
+- name: testProjects
+  type: string
+  default: '**/*[Uu]nit[Tt]ests/*.csproj'
+- name: webProjName
+  type: string
+- name: uiAppDir
+  type: string
+
+jobs:
+- job: Build_Web_App_UI_Job
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: Restore
+    inputs:
+      command: restore
+      projects: ${{ parameters.projects }}
+      vstsFeed: '${{ parameters.feed }}'
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      projects: ${{ parameters.projects }}
+      arguments: '--configuration ${{ parameters.buildConfiguration }}'
+  - task: DotNetCoreCLI@2
+    displayName: Test
+    inputs:
+      command: test
+      projects: ${{ parameters.testProjects }}
+      arguments: '--configuration ${{ parameters.buildConfiguration }}' 
+  - task: Npm@1
+    displayName: 'npm install'
+    inputs:
+      workingDir: '${{ parameters.webProjName }}/${{ parameters.uiAppDir }}'
+      verbose: false
+  - task: Npm@1
+    displayName: 'npm build'
+    inputs:
+      command: custom
+      workingDir: '${{ parameters.webProjName }}/${{ parameters.uiAppDir }}'
+      verbose: false
+      customCommand: 'run predeploy:prod'
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: wwwroot/app'
+    inputs:
+      SourceFolder: '${{ parameters.webProjName }}/${{ parameters.uiAppDir }}/build'
+      TargetFolder: '$(Build.SourcesDirectory)/${{ parameters.webProjName }}/wwwroot/app'
+      CleanTargetFolder: true
+      OverWrite: true
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish ${{ parameters.webProjName }}'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: '**/${{ parameters.webProjName }}.csproj'
+      arguments: '--configuration ${{ parameters.buildConfiguration }} --output $(build.artifactstagingdirectory)/${{ parameters.webProjName }}'
+      zipAfterPublish: True
+  - publish: '$(build.artifactstagingdirectory)/${{ parameters.webProjName }}'
+    displayName: 'Publish Artifact'
+    artifact: '${{ parameters.webProjName }}'

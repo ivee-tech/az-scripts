@@ -1,0 +1,62 @@
+{
+    "count": 1,
+    "value": [
+        {
+            "data": {
+                "appObjectId": "090045ca-1c66-4f9d-92dd-2aa16255e51f",
+                "azureSpnPermissions": "[{\"roleAssignmentId\":\"fb50ea75-cbce-4c5a-99a2-3c559832803d\",\"resourceProvider\":\"Microsoft.RoleAssignment\",\"provisioned\":true}]",
+                "azureSpnRoleAssignmentId": "fb50ea75-cbce-4c5a-99a2-3c559832803d",
+                "registryId": "/subscriptions/6b40a9d0-1170-453b-acfb-d592bf4339ae/resourceGroups/containers999/providers/Microsoft.ContainerRegistry/registries/acr9998877",
+                "registrytype": "ACR",
+                "spnObjectId": "0fc81ca0-2137-4f8f-acae-31ed8905d360",
+                "subscriptionId": "6b40a9d0-1170-453b-acfb-d592bf4339ae",
+                "subscriptionName": "Microsoft Azure Internal Consumption"
+            },
+            "id": "349e9864-b8f7-4733-be5d-6f4bbbabb16e",
+            "name": "acr9998877",
+            "type": "dockerregistry",
+            "url": "https://hub.docker.com/",
+            "createdBy": {
+                "displayName": "Daniel Radu",
+                "url": "https://spsprodeau1.vssps.visualstudio.com/A10eea6c4-9b3b-4d83-8bc8-9b764fa03502/_apis/Identities/1d923389-c58f-616d-819f-028629c0bfd9",
+                "_links": {
+                    "avatar": {
+                        "href": "https://dev.azure.com/daradu/_apis/GraphProfile/MemberAvatars/aad.MWQ5MjMzODktYzU4Zi03MTZkLTgxOWYtMDI4NjI5YzBiZmQ5"
+                    }
+                },
+                "id": "1d923389-c58f-616d-819f-028629c0bfd9",
+                "uniqueName": "daradu@microsoft.com",
+                "imageUrl": "https://dev.azure.com/daradu/_apis/GraphProfile/MemberAvatars/aad.MWQ5MjMzODktYzU4Zi03MTZkLTgxOWYtMDI4NjI5YzBiZmQ5",
+                "descriptor": "aad.MWQ5MjMzODktYzU4Zi03MTZkLTgxOWYtMDI4NjI5YzBiZmQ5"
+            },
+            "description": "",
+            "authorization": {
+                "parameters": {
+                    "loginServer": "acr9998877.azurecr.io",
+                    "role": "8311e382-0749-4cb8-b61a-304f252e45ec",
+                    "scope": "/subscriptions/6b40a9d0-1170-453b-acfb-d592bf4339ae/resourceGroups/containers999/providers/Microsoft.ContainerRegistry/registries/acr9998877",
+                    "servicePrincipalId": "a1d5c213-c915-41e3-bf55-e6f5085b7103",
+                    "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                },
+                "scheme": "ServicePrincipal"
+            },
+            "isShared": false,
+            "isReady": true,
+            "operationStatus": {
+                "state": "Ready",
+                "statusMessage": ""
+            },
+            "owner": "Library",
+            "serviceEndpointProjectReferences": [
+                {
+                    "projectReference": {
+                        "id": "f12efd5d-c36e-4d1a-9c02-3f1c68ce3bba",
+                        "name": "AAC"
+                    },
+                    "name": "acr9998877",
+                    "description": ""
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+version: '3.4'
+services:
+  __TESTS_SVC_NAME__:
+    build:
+      context: .
+      args:
+        TESTS_URL: __TESTS_URL__
+        TESTS_ARC_NAME: __TESTS_ARC_NAME__
+        TESTS_BIN_NAME: __TESTS_BIN_NAME__
+        RUNSETTINGS_FILE_NAME: __RUNSETTINGS_FILE_NAME__
+    restart: "no"

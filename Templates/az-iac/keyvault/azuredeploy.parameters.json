@@ -1,0 +1,12 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "value": "ccn-kv"
+        },
+        "objectId": {
+            "value": "23121eeb-87a6-4ed1-b58b-4d9f249b8b1a"
+        }
+    }
+}

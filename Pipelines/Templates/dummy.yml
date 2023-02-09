@@ -1,0 +1,8 @@
+parameters:
+- name: name
+  type: string
+
+steps:
+- script: |
+    echo "Hello World, ${{ parameters.name }}"
+  displayName: hello

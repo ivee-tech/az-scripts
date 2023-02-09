@@ -1,0 +1,18 @@
+parameters:
+- name: dockerRegConnection
+  type: string
+- name: imageName
+  type: string
+- name: imageTag
+  type: string
+- name: jobName
+  type: string
+
+steps:
+- task: Docker@2
+  displayName: Push
+  inputs:
+    command: push
+    containerRegistry: ${{ parameters.dockerRegConnection }}
+    repository: ${{ parameters.imageName }}
+    tags: ${{ parameters.imageTag }}

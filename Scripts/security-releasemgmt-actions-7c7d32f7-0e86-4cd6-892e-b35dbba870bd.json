@@ -1,0 +1,38 @@
+  [
+    {
+      "bit": 1,
+      "displayName": "View task editor",
+      "name": "ViewTaskEditor",
+      "namespaceId": "7c7d32f7-0e86-4cd6-892e-b35dbba870bd"
+    },
+    {
+      "bit": 2,
+      "displayName": "View CD workflow editor",
+      "name": "ViewCDWorkflowEditor",
+      "namespaceId": "7c7d32f7-0e86-4cd6-892e-b35dbba870bd"
+    },
+    {
+      "bit": 4,
+      "displayName": "Export release pipeline",
+      "name": "ExportReleaseDefinition",
+      "namespaceId": "7c7d32f7-0e86-4cd6-892e-b35dbba870bd"
+    },
+    {
+      "bit": 8,
+      "displayName": "View legacy UI",
+      "name": "ViewLegacyUI",
+      "namespaceId": "7c7d32f7-0e86-4cd6-892e-b35dbba870bd"
+    },
+    {
+      "bit": 16,
+      "displayName": "Deployment summary across projects",
+      "name": "DeploymentSummaryAcrossProjects",
+      "namespaceId": "7c7d32f7-0e86-4cd6-892e-b35dbba870bd"
+    },
+    {
+      "bit": 32,
+      "displayName": "View external artifact commits and work items",
+      "name": "ViewExternalArtifactCommitsAndWorkItems",
+      "namespaceId": "7c7d32f7-0e86-4cd6-892e-b35dbba870bd"
+    }
+  ]

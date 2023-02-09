@@ -1,0 +1,103 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.451.19169",
+      "templateHash": "393832804745273278"
+    }
+  },
+  "parameters": {
+    "hostingPlanName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the app service plan"
+      }
+    },
+    "os": {
+      "type": "string",
+      "allowedValues": [
+        "windows",
+        "linux",
+        "windows-container"
+      ]
+    },
+    "hostingPlanKind": {
+      "type": "string",
+      "defaultValue": "app",
+      "metadata": {
+        "description": "The kind of the app service plan"
+      },
+      "allowedValues": [
+        "app",
+        "functionapp"
+      ]
+    },
+    "hostingEnvironment": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The name of ASE, required if the app is hosted in ASE"
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "S1",
+      "allowedValues": [
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "I1",
+        "I2",
+        "I3",
+        "I1v2",
+        "I2v2",
+        "I3v2",
+        "P1v3",
+        "P2v3",
+        "P3v3"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and instance size. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "skuCapacity": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "metadata": {
+        "description": "Describes plan's instance count"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    }
+  },
+  "functions": [],
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-09-01",
+      "name": "[parameters('hostingPlanName')]",
+      "location": "[parameters('location')]",
+      "kind": "[parameters('hostingPlanKind')]",
+      "properties": {
+        "hostingEnvironment": "[if(not(equals(parameters('hostingEnvironment'), '')), parameters('hostingEnvironment'), '')]",
+        "reserved": "[if(equals(parameters('os'), 'linux'), true(), false())]",
+        "hyperV": "[if(equals(parameters('os'), 'windows-container'), true(), false())]"
+      },
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "capacity": "[parameters('skuCapacity')]"
+      }
+    }
+  ]
+}

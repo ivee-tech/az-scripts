@@ -1,0 +1,37 @@
+parameters:
+- name: azureSubscription
+  type: string
+- name: resourceGroup
+  type: string
+- name: location
+  type: string
+- name: sqlArmTemplate
+  type: string
+- name: dbServerName
+  type: string
+- name: Settings_AppDB
+  type: string
+- name: Settings_AppDBUser
+  type: string
+- name: Settings_AppDBPassword
+  type: string
+
+jobs:
+- job: Deploy_Sql_Job
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifact: ${{ parameters.sqlArmTemplate }}
+      path: $(Pipeline.Workspace)/${{ parameters.sqlArmTemplate }}
+  - script: |
+      dir $(Pipeline.Workspace)
+      dir $(Pipeline.Workspace)/${{ parameters.sqlArmTemplate }}
+  - task: AzureResourceGroupDeployment@2
+    displayName: 'Azure Deployment: Deploy Sql on ${{ parameters.resourceGroup }}'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      resourceGroupName: ${{ parameters.resourceGroup }}
+      location: ${{ parameters.location }}
+      csmFile: '$(Pipeline.Workspace)/${{ parameters.sqlArmTemplate }}/azuredeploy.json'
+      overrideParameters: '-dbServerName ${{ parameters.dbServerName }} -dbName ${{ parameters.Settings_AppDB }} -sqlAdministratorLogin ${{ parameters.Settings_AppDBUser }} -sqlAdministratorLoginPassword "${{ parameters.Settings_AppDBPassword }}"'
+      deploymentName: 'app-sql-deployment'

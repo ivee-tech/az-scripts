@@ -1,0 +1,29 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "australiacentral"
+        },
+        "vnetName": {
+            "value": "awe-vnet-001"
+        },
+        "vnetAddressPrefix": {
+            "value": [
+                "172.17.0.0/16"
+            ]
+        },
+        "subnet1Name": {
+            "value": "default"
+        },
+        "subnet1Prefix": {
+            "value": "172.17.0.0/24"
+        },
+        "subnet2Name": {
+            "value": "subnet2"
+        },
+        "subnet2Prefix": {
+            "value": "172.17.1.0/24"
+        }
+    }
+}

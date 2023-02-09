@@ -1,0 +1,29 @@
+parameters:
+- name: webProjName
+  type: string
+
+jobs:
+- job: Build_Web_App_UI_Doc_Job
+  steps:
+  - task: Npm@1
+    displayName: 'npm install'
+    inputs:
+      workingDir: '${{ parameters.webProjName }}'
+      verbose: false
+  - task: Npm@1
+    displayName: 'npm doc'
+    inputs:
+      command: custom
+      workingDir: '${{ parameters.webProjName }}'
+      verbose: false
+      customCommand: 'run styleguide:build'
+  - task: CopyFiles@2
+    displayName: 'Copy UI Files'
+    inputs:
+      SourceFolder: '${{ parameters.webProjName }}/styleguide'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.webProjName }}/docs'
+      CleanTargetFolder: true
+      OverWrite: true
+  - publish: '$(Build.ArtifactStagingDirectory)/${{ parameters.webProjName }}/docs'
+    displayName: 'Publish Docs Artifact'
+    artifact: 'docs'

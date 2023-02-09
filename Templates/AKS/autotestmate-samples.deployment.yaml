@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: __AUTOTESTMATE_SAMPLES_APP_NAME__
+spec:
+  replicas: __AUTOTESTMATE_SAMPLES_REPLICAS__
+  selector:
+    matchLabels:
+      app: __AUTOTESTMATE_SAMPLES_APP_NAME__
+  template:
+    metadata:
+      labels:
+        app: __AUTOTESTMATE_SAMPLES_APP_NAME__
+    spec:
+      containers:
+        - name: __AUTOTESTMATE_SAMPLES_APP_NAME__
+          image: __AUTOTESTMATE_SAMPLES_FULL_IMAGE_NAME__ # autotestmate-samples:latest
+          # resources:
+          #   requests:
+          #     cpu: "__AUTOTESTMATE_SAMPLES_REQUESTS_CPU__"
+          #     memory: "__AUTOTESTMATE_SAMPLES_REQUESTS_MEMORY__"
+          #   limits:
+          #     cpu: "__AUTOTESTMATE_SAMPLES_LIMITS_CPU__"
+          #     memory: "__AUTOTESTMATE_SAMPLES_LIMITS_MEMORY__"
+          imagePullPolicy: IfNotPresent
+      restartPolicy: OnFailure
+  backOffLimit: 0 # not the best solution, temporary one

@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+  dockeragent-win:
+    restart: "no"
+    image: dockeragent-win:latest
+    environment:
+      - AZP_URL=https://dev.azure.com/daradu
+      - AZP_AGENT_NAME=dockeragent-win-000
+      - AZP_TOKEN=***
+      - AZP_POOL=AWEPool

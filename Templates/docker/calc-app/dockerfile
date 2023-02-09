@@ -1,0 +1,19 @@
+# Build runtime image
+# FROM mcr.microsoft.com/dotnet/aspnet:3.1
+FROM registry.access.redhat.com/ubi8/dotnet-50-runtime
+WORKDIR /app
+COPY ./ETSDemo.App/out .
+
+# RUN mkdir ./Views  
+# /app/Shared /app/Home
+
+
+# hack to solve https://github.com/dotnet/aspnetcore/issues/27232
+#COPY --from=build-env /app/*.cshtml .
+#COPY --from=build-env /app/Shared/*.cshtml ./Shared/
+#COPY --from=build-env /app/Home/*.cshtml ./Home/
+
+# COPY --from=build-env /app/out/Views /Views
+ENTRYPOINT ["dotnet", "ETSDemo.App.dll"]
+# CMD ["dotnet", "ETSDemo.App.dll"]
+

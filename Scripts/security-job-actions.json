@@ -1,0 +1,22 @@
+[
+  [
+    {
+      "bit": 1,
+      "displayName": "View background job information",
+      "name": "Read",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 2,
+      "displayName": "Queue background jobs",
+      "name": "Queue",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 4,
+      "displayName": "Manage background jobs",
+      "name": "Update",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+]

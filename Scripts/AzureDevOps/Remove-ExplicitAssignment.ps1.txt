@@ -1,0 +1,38 @@
+﻿# . .\AzureDevOpsContext.ps1
+# . .\Get-Group.ps1
+# . .\Get-User.ps1
+
+# NOT DOCUMENTED, CAPTURED FROM GUI
+Function Remove-ExplicitAssignment
+{
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][string]$entitlementId,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+$v = $context.apiVersion + '-preview.3'
+$entitlementsCtx = Get-AzureDevOpsContext -protocol https -coreServer vsaex.dev.azure.com -org $context.org -project $context.project -apiVersion $context.apiVersion `
+    -pat $context.pat -isOnline
+
+$user = Get-User -userName $userName -context $context
+Write-Host $user
+
+# https://vsaex.dev.azure.com/daradu/_apis/MEMInternal/RemoveExplicitAssignment?select=grouprules&ruleOption=0
+
+$ruleOption = 0 # 1 for DRY-RUN?
+$entitlementsUrl = $entitlementsCtx.orgBaseUrl + '/MEMInternal/RemoveExplicitAssignment?select=grouprules&ruleOption=' + $ruleOption + '?api-version=' + $v
+$entitlementsUrl
+
+$data = @($entitlementId) | ConverTo-Json 
+
+if($context.isOnline) {
+    $response = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $entitlementsUrl -Method Post
+}
+else {
+    $response = Invoke-RestMethod -Uri $entitlementsUrl -UseDefaultCredentials -Method Post
+}
+
+return $response
+
+}

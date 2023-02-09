@@ -1,0 +1,137 @@
+{
+    "options": [
+        {
+            "enabled": false,
+            "definition": {
+                "id": "5d58cc01-7c75-450c-be18-a388ddb129ec"
+            },
+            "inputs": {
+                "branchFilters": "[\"+refs/heads/*\"]",
+                "additionalFields": "{}"
+            }
+        },
+        {
+            "enabled": false,
+            "definition": {
+                "id": "a9db38f9-9fdc-478c-b0f9-464221e58316"
+            },
+            "inputs": {
+                "workItemType": "Bug",
+                "assignToRequestor": "true",
+                "additionalFields": "{}"
+            }
+        }
+    ],
+    "variables": {
+        "system.debug": {
+            "value": "false",
+            "allowOverride": true
+        },
+        "webProjName": {
+            "value": ""
+        }
+    },
+    "properties": {},
+    "tags": [],
+    "jobAuthorizationScope": 1,
+    "jobTimeoutInMinutes": 60,
+    "jobCancelTimeoutInMinutes": 5,
+    "process": {
+        "phases": [
+            {
+                "steps": [
+                    {
+                        "environment": {},
+                        "enabled": true,
+                        "continueOnError": true,
+                        "alwaysRun": true,
+                        "displayName": "Task group: BuildWebApp-MSCA",
+                        "timeoutInMinutes": 0,
+                        "condition": "succeededOrFailed()",
+                        "task": {
+                            "id": "",
+                            "versionSpec": "1.*",
+                            "definitionType": "metaTask"
+                        },
+                        "inputs": {
+                            "blobAccountName": "$(blobAccountName)",
+                            "blobContainerName": "$(blobContainerName)",
+                            "BuildConfiguration": "",
+                            "connectionBlobSas": "$(connectionBlobSas)",
+                            "connectionServiceBusSas": "$(connectionServiceBusSas)",
+                            "productCatalogClientId": "$(productCatalogClientId)",
+                            "productCatalogClientSecret": "$(productCatalogClientSecret)",
+                            "sdlAnalyticsServiceBusSasToken": "$(sdlAnalyticsServiceBusSasToken)",
+                            "sdlAnalyticsServiceBusUri": "$(sdlAnalyticsServiceBusUri)",
+                            "serviceBusUriWithQueue": "$(serviceBusUriWithQueue)",
+                            "webProjName": "$(webProjName)"
+                        }
+                    }
+                ],
+                "name": "Agent job 1",
+                "refName": "Job_1",
+                "condition": "succeeded()",
+                "target": {
+                    "executionOptions": {
+                        "type": 0
+                    },
+                    "allowScriptsAuthAccessOption": false,
+                    "type": 1
+                },
+                "jobAuthorizationScope": 1
+            }
+        ],
+        "target": {
+            "agentSpecification": {
+                "identifier": "windows-2019"
+            }
+        },
+        "type": 1
+    },
+    "repository": {
+        "properties": {
+            "cleanOptions": "0",
+            "labelSources": "0",
+            "labelSourcesFormat": "$(build.buildNumber)",
+            "reportBuildStatus": "true",
+            "gitLfsSupport": "false",
+            "skipSyncSource": "false",
+            "checkoutNestedSubmodules": "false",
+            "fetchDepth": "0"
+        },
+        "id": "758a0e28-5e2e-4947-8553-b8b35f039815",
+        "type": "TfsGit",
+        "name": "ACC-003-app",
+        "defaultBranch": "refs/heads/master",
+        "clean": "false",
+        "checkoutSubmodules": false
+    },
+    "processParameters": {},
+    "quality": 1,
+    "drafts": [],
+    "queue": {
+        "id": 553,
+        "name": "Azure Pipelines",
+        "pool": {
+            "id": 12,
+            "name": "Azure Pipelines",
+            "isHosted": true
+        }
+    },
+    "id": 63,
+    "name": "",
+    "uri": "vstfs:///Build/Definition/63",
+    "path": "\\",
+    "type": 2,
+    "queueStatus": 0,
+    "revision": 5,
+    "createdDate": "2020-06-10T04:15:44.650Z",
+    "project": {
+        "id": "ae5471cf-47bb-4832-ad94-1b2099d8c182",
+        "name": "",
+        "state": 1,
+        "revision": 474,
+        "visibility": 0,
+        "lastUpdateTime": "2020-06-08T21:12:40.747Z"
+    }
+}

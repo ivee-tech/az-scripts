@@ -1,0 +1,94 @@
+[
+  [
+    {
+      "bit": 1,
+      "displayName": "View builds",
+      "name": "ViewBuilds",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 2,
+      "displayName": "Edit build quality",
+      "name": "EditBuildQuality",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 4,
+      "displayName": "Retain indefinitely",
+      "name": "RetainIndefinitely",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 8,
+      "displayName": "Delete builds ",
+      "name": "DeleteBuilds",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 16,
+      "displayName": "Manage build qualities",
+      "name": "ManageBuildQualities",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 32,
+      "displayName": "Destroy builds",
+      "name": "DestroyBuilds",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 64,
+      "displayName": "Update build information",
+      "name": "UpdateBuildInformation",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 128,
+      "displayName": "Queue builds",
+      "name": "QueueBuilds",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 256,
+      "displayName": "Manage build queue",
+      "name": "ManageBuildQueue",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 512,
+      "displayName": "Stop builds",
+      "name": "StopBuilds",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 1024,
+      "displayName": "View build pipeline",
+      "name": "ViewBuildDefinition",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 2048,
+      "displayName": "Edit build pipeline",
+      "name": "EditBuildDefinition",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 4096,
+      "displayName": "Delete build pipeline",
+      "name": "DeleteBuildDefinition",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 8192,
+      "displayName": "Override check-in validation by build",
+      "name": "OverrideBuildCheckInValidation",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 16384,
+      "displayName": "Administer build permissions",
+      "name": "AdministerBuildPermissions",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+]

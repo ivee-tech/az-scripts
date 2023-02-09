@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+  __DOCKERAGENT_SVC_NAME__:
+    build:
+      context: .
+      args:
+        AZP_URL: __AZP_URL__
+        AZP_TOKEN: __AZP_TOKEN__
+    image: __IMAGE_NAME__:__IMAGE_TAG__
+    restart: "no"

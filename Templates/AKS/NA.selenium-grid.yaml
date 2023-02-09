@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-grid
+  labels:
+    app: selenium-grid
+spec:
+  replicas: __SELENIUM_GRID_REPLICAS__
+  template:
+    metadata:
+      name: selenium-grid
+      labels:
+        app: selenium-grid
+    spec:
+      containers:
+      - name: selenium-grid
+        image: __SELENIUM_GRID_ACR__/__SELENIUM_GRID_IMAGE_NAME__:__SELENIUM_GRID_IMAGE_TAG__
+        imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: selenium-grid
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenium-grid-service
+  labels:
+    app: selenium-grid-service
+spec:
+  selector:
+    app: selenium-grid
+  ports:
+    - port: 4444
+      targetPort: 4444
+  type: LoadBalancer
+  
+  

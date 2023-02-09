@@ -1,0 +1,11 @@
+parameters:
+- name: azureSubscription
+  type: string
+
+steps:
+- task: AzureFunctionApp@1 # Add this at the end of your file
+  inputs:
+    azureSubscription: ${{ parameters.azureSubscription }}
+    appType: functionAppLinux
+    appName: $(appName)
+    package: $(System.ArtifactsDirectory)/**/*.zip

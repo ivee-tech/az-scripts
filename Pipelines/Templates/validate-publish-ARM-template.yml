@@ -1,0 +1,41 @@
+parameters:
+- name: azureSubscription
+  type: string
+- name: resourceGroup
+  type: string
+- name: location
+  type: string
+- name: armTemplate
+  type: string
+
+steps:
+# - template: clone-infra.yml
+- script: |
+    dir
+- task: AzureResourceGroupDeployment@2
+  displayName: 'Azure Deployment: Validate ARM Template'
+  inputs:
+    azureSubscription: '${{ parameters.azureSubscription }}'
+    resourceGroupName: '${{ parameters.resourceGroup }}'
+    location: '${{ parameters.location }}'
+    csmFile: infrastructure/Templates/ARM/${{ parameters.armTemplate }}/azuredeploy.json
+    csmParametersFile: infrastructure/Templates/ARM/${{ parameters.armTemplate }}/azuredeploy.parameters.json
+    deploymentMode: Validation
+
+- task: CopyFiles@2
+  displayName: 'Copy ARM Templates'
+  inputs:
+    SourceFolder: 'infrastructure/Templates/ARM/${{ parameters.armTemplate }}'
+    Contents: |
+      **/*.json
+      **/*.sh
+      **/*.ps1
+    TargetFolder: '$(build.artifactstagingdirectory)/Templates/ARM/${{ parameters.armTemplate }}'
+    OverWrite: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)/Templates/ARM/${{ parameters.armTemplate }}'
+    ArtifactName: '${{ parameters.armTemplate }}'
+  condition: succeededOrFailed()

@@ -1,0 +1,25 @@
+parameters:
+- name: azureSubscription
+  type: string
+- name: appName
+  type: string
+- name: webProjName
+  type: string
+
+steps:
+- download: current
+  artifact: ${{ parameters.webProjName }}
+- task: qetza.replacetokens.replacetokens-task.replacetokens@3
+  displayName: 'Replace tokens'
+  inputs:
+    targetFiles: |
+      $(Pipeline.Workspace)/${{ parameters.webProjName }}/**/config.json
+      $(Pipeline.Workspace)/${{ parameters.webProjName }}/**/web.config
+    tokenPrefix: __
+    tokenSuffix: __
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Deploy Azure App Service'
+  inputs:
+    azureSubscription: '${{ parameters.azureSubscription }}'
+    WebAppName: '${{ parameters.appName }}'
+    packageForLinux: '$(Pipeline.Workspace)/${{ parameters.webProjName }}'

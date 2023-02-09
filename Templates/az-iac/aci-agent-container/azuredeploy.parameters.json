@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "containerGroupName": {
+      "value": "GEN-UNIQUE"
+    },
+    "containerName": {
+      "value": "GEN-UNIQUE"
+    },
+    "imageName": {
+      "value": "GEN-UNIQUE"
+    },
+    "osType": {
+      "value": "Linux"
+    },
+    "AZP_URL": {
+      "value": "GEN-UNIQUE"
+    },
+    "AZP_TOKEN": {
+      "value": "GEN-UNIQUE"
+    },
+    "AZP_POOL": {
+      "value": "GEN-UNIQUE"
+    },
+    "AZP_AGENT_NAME": {
+      "value": "GEN-UNIQUE"
+    },
+    "AZP_WORK": {
+      "value": ""
+    }
+  }
+}

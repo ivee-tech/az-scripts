@@ -1,0 +1,86 @@
+  [
+    {
+      "bit": 1,
+      "displayName": "View release pipeline",
+      "name": "ViewReleaseDefinition",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 2,
+      "displayName": "Edit release pipeline",
+      "name": "EditReleaseDefinition",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 4,
+      "displayName": "Delete release pipeline",
+      "name": "DeleteReleaseDefinition",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 8,
+      "displayName": "Manage release approvers",
+      "name": "ManageReleaseApprovers",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 16,
+      "displayName": "Manage releases",
+      "name": "ManageReleases",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 32,
+      "displayName": "View releases",
+      "name": "ViewReleases",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 64,
+      "displayName": "Create releases",
+      "name": "CreateReleases",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 128,
+      "displayName": "Edit release stage",
+      "name": "EditReleaseEnvironment",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 256,
+      "displayName": "Delete release stage",
+      "name": "DeleteReleaseEnvironment",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 512,
+      "displayName": "Administer release permissions",
+      "name": "AdministerReleasePermissions",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 1024,
+      "displayName": "Delete releases",
+      "name": "DeleteReleases",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 2048,
+      "displayName": "Manage deployments",
+      "name": "ManageDeployments",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 4096,
+      "displayName": "Manage release settings",
+      "name": "ManageReleaseSettings",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    },
+    {
+      "bit": 8192,
+      "displayName": "Manage TaskHub Extension",
+      "name": "ManageTaskHubExtension",
+      "namespaceId": "c788c23e-1b46-4162-8f5e-d7585343b5de"
+    }
+  ]

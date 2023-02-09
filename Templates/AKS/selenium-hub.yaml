@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: __SELENIUM_HUB_APP_NAME__
+spec:
+  selector:
+    matchLabels:
+      app: __SELENIUM_HUB_APP_NAME__
+  template:
+    metadata:
+      labels:
+        app: __SELENIUM_HUB_APP_NAME__
+    spec:
+      containers:
+        - name: __SELENIUM_HUB_APP_NAME__
+          image: __SELENIUM_HUB_FULL_IMAGE_NAME__ #selenium/hub:3.141
+          ports:
+            - containerPort: 4444
+          env:
+            - name: MAX_SESSION
+              value: "__MAX_SESSION__"
+          resources:
+            requests:
+              cpu: "__SELENIUM_HUB_REQUESTS_CPU__"
+              memory: "__SELENIUM_HUB_REQUESTS_MEMORY__"
+            limits:
+              cpu: "__SELENIUM_HUB_LIMITS_CPU__"
+              memory: "__SELENIUM_HUB_LIMITS_MEMORY__"
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /wd/hub/status
+              port: 4444
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /grid/console
+              port: 4444
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: __SELENIUM_GRID_SVC_NAME__
+  labels:
+    app: __SELENIUM_GRID_SVC_NAME__
+spec:
+  selector:
+    app: __SELENIUM_HUB_APP_NAME__
+  ports:
+    - port: 4444
+      targetPort: 4444
+  type: LoadBalancer

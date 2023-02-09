@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "value": "6b40a9d0-1170-453b-acfb-d592bf4339ae"
+        },
+        "name": {
+            "value": "dawr-demo-docker"
+        },
+        "location": {
+            "value": "Australia Central"
+        },
+        "hostingPlanName": {
+            "value": "dawr-demo-docker-plan"
+        },
+        "serverFarmResourceGroup": {
+            "value": "awe"
+        },
+        "alwaysOn": {
+            "value": false
+        },
+        "sku": {
+            "value": "Free"
+        },
+        "skuCode": {
+            "value": "F1"
+        },
+        "workerSize": {
+            "value": "0"
+        },
+        "workerSizeId": {
+            "value": "0"
+        },
+        "numberOfWorkers": {
+            "value": "1"
+        },
+        "linuxFxVersion": {
+            "value": "DOCKER|autotestingacr.azurecr.io/node:16-alpine3.11"
+        },
+        "registryName": {
+            "value": "autotestingacr"
+        },
+        "registryResourceGroupName": {
+            "value": "auto-testing"
+        },
+        "registryStartupCommand": {
+            "value": ""
+        }
+    }
+}

@@ -1,0 +1,25 @@
+parameters:
+- name: varGroup
+  type: string
+- name: varGroupKeys
+  type: string
+
+stages:
+- stage: Deploy_Sql
+  variables:
+  - ${{ if eq(parameters.varGroup, 'CCN-invoicing-app') }}:
+    - group: ${{ parameters.varGroup }}
+  - ${{ if eq(parameters.varGroupKeys, 'CCN-invoicing-app-keys') }}:
+    - group: ${{ parameters.varGroupKeys }}
+  jobs:
+  - job: Deploy_Sql_Job
+    steps:
+    - task: AzureResourceGroupDeployment@2
+      displayName: 'Azure Deployment: Deploy Sql on $(resourceGroup)'
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        resourceGroupName: '$(resourceGroup)'
+        location: '$(location)'
+        csmFile: 'Templates/$(sqlArmTemplate)/azuredeploy.json'
+        overrideParameters: '-dbServerName $(dbServerName) -dbName $(Settings_AppDB) -sqlAdministratorLogin $(Settings_AppDBUser) -sqlAdministratorLoginPassword "$(Settings-AppDBPassword)"'
+        deploymentName: 'app-sql-deployment'

@@ -1,0 +1,5 @@
+steps:
+- script: |
+    git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" clone $(System.CollectionUri)$(System.TeamProject)/_git/infrastructure $(Build.SourcesDirectory)/infrastructure
+    ls $(Build.SourcesDirectory)/infrastructure
+  displayName: 'Clone infrastructure'

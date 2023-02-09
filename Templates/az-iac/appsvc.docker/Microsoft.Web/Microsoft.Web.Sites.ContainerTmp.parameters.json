@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appName": {
+            "value": ""
+        },
+        "location": {
+            "value": "AustraliaCentral"
+        },
+        "hostingPlanName": {
+            "value": ""
+        },
+        "appServiceSku": {
+            "value": ""
+        },
+        "dockerRegistryName": {
+            "value": ""
+        },
+        "dockerRegistryResourceGroupName": {
+            "value": ""
+        },
+        "dockerImageName": {
+            "value": ""
+        },
+        "dockerImageTag": {
+            "value": ""
+        },
+        "os": {
+            "value": ""
+        },
+        "kind": {
+            "value": ""
+        },
+        "appKind": {
+            "value": ""
+        },
+        "stack": {
+            "value": ""
+        },
+        "stackVersion": {
+            "value": ""
+        },
+        "isContainer": {
+            "value": false
+        }
+    }
+}

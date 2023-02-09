@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: __AUTOTESTMATE_APP_NAME__
+spec:
+  # ttlSecondsAfterFinished: __AUTOTESTMATE_TTLSECONDSAFTERFINISHED__ # seconds
+  template:
+    metadata:
+      labels:
+        app: __AUTOTESTMATE_APP_NAME__
+    spec:
+      containers:
+        - name: __AUTOTESTMATE_APP_NAME__
+          image: __AUTOTESTMATE_FULL_IMAGE_NAME__ # autotestmate-samples:latest
+          env:
+            - name: TestIterationCount
+              value: "__TEST_ITERATION_COUNT__"
+          # resources:
+          #   requests:
+          #     cpu: "__AUTOTESTMATE_REQUESTS_CPU__"
+          #     memory: "__AUTOTESTMATE_REQUESTS_MEMORY__"
+          #   limits:
+          #     cpu: "__AUTOTESTMATE_LIMITS_CPU__"
+          #     memory: "__AUTOTESTMATE_LIMITS_MEMORY__"
+          imagePullPolicy: Always
+      restartPolicy: OnFailure
+  backoffLimit: __AUTOTESTMATE_BACKOFFLIMIT__ # default 6, 0 to no restart
+  completions: __AUTOTESTMATE_REPLICAS__
+  parallelism: __AUTOTESTMATE_PARALLELISM__

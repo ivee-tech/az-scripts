@@ -1,0 +1,153 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "hostingPlanName": {
+      "type": "string",
+      "metadata": {
+        "description": "The plan name for this web application."
+      }
+    },
+    "appName": {
+      "type": "string",
+      "metadata": {
+        "description": "The web application name. It must be unique across all Azure web apps. The application Url is https://[appName].azurewebsites.net"
+      }
+    },
+    "environments": {
+      "defaultValue": [ "Staging" ],
+      "type": "array",
+      "metadata": {
+        "description": "Array with the names for the environment slots"
+      },
+      "maxLength": 19
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "australiaeast",
+      "metadata": {
+        "description": "Location (region) for all resources."
+      }
+    },
+    "appServiceSku": {
+      "type": "string",
+      "defaultValue": "S1",
+      "metadata": {
+        "description": "The SKU of App Service Plan "
+      }
+    },
+    "dockerRegistryName": {
+      "type": "string",
+    },
+    "dockerRegistryResourceGroupName": {
+      "type": "string"
+    },
+    "dockerImageName": {
+      "type": "string",
+      "defaultValue": "_MY_REGISTRY_USERNAME_.azurecr.io/_MY_NAMESPACE_/_MY_DOCKER_IMAGE_NAME_:_TAG_"
+    },
+    "dockerImageTag": {
+      "type": "string",
+    },
+    "isContainer": {
+      "type": "boolean"
+    },
+    "os": {
+      "type": "string",
+      "allowedValues": [
+        "windows",
+        "linux"
+      ]
+    },
+    "stack": {
+      "type": "string",
+      "allowedValues": [
+        "dotnet",
+        "dotnetcore",
+        "node"
+      ]
+    },
+    "stackVersion": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "name": "projectname-",
+    "webAppPortalName": "[parameters('appName')]",
+    "appServicePlanName": "[parameters('hostingPlanName')]",
+    "isDocker": "[if(not(equals(parameters('dockerRegistryName'), '')), true(), false())]",
+    "registryResourceId": "[resourceId(parameters('dockerRegistryResourceGroupName'), 'Microsoft.ContainerRegistry/registries', parameters('dockerRegistryName'))]",
+    "registryUrl": "[concat('https://', parameters('dockerRegistryName'), '.azurecr.io')]",
+    "fullImageName": "[concat(parameters('dockerRegistryName'), '.azurecr.io/', parameters('dockerImageName'), ':', parameters('dockerImageTag'))]",
+    "fxVersion": "[concat('DOCKER|', variables('fullImageName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2017-08-01",
+      "type": "Microsoft.Web/serverfarms",
+      "kind": "[if(true(), 'linux', null())]",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "comments": "This app service plan is used for the web app and slots.",
+      "properties": {
+        "reserved": true
+      },
+      "dependsOn": [],
+      "sku": {
+        "name": "[parameters('appServiceSku')]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2016-08-01",
+      "name": "[variables('webAppPortalName')]",
+      "kind": "app,linux,container",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ],
+      "properties": {
+        "name": "[variables('webAppPortalName')]",
+        "siteConfig": {
+          "linuxFxVersion": "[concat('DOCKER|', parameters('dockerImageName'))]",
+          "enabled": true,
+          "appSettings": "[if(not(equals(parameters('dockerRegistryName'), '')), createArray(
+      		createObject('name', 'DOCKER_REGISTRY_SERVER_URL', 'value', variables('registryUrl')), 
+      		createObject('name', 'DOCKER_REGISTRY_SERVER_USERNAME', 'value', listCredentials(variables('registryResourceId'), '2019-05-01').username), 
+      		createObject('name', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'value', listCredentials(variables('registryResourceId'), '2019-05-01').passwords[0].value), 
+      		createObject('name', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'value', 'false')), 
+      	    createArray())]",
+          "netFrameworkVersion": "[if(equals(parameters('stackVersion'), 'dotnet'), parameters('stackVersion'), null())]"
+        },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      }
+    },
+    {
+      "apiVersion": "2018-11-01",
+      "type": "Microsoft.Web/sites/slots",
+      "name": "[concat(variables('webAppPortalName'), '/staging')]",
+      "kind": "app,linux,container",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/Sites', variables('webAppPortalName'))]"
+      ],
+      "properties": {
+        "siteConfig": {
+          "linuxFxVersion": "[concat('DOCKER|', parameters('dockerImageName'))]",
+          "enabled": true,
+          "appSettings": [
+            {
+              "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+              "value": "false"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_URL",
+              "value": "[variables('registryUrl')]"
+            }
+          ]
+        },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      }
+    }
+  ]
+}

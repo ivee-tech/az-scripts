@@ -1,0 +1,34 @@
+[
+    [
+      {
+        "bit": 1,
+        "displayName": "Use Service Connection",
+        "name": "Use",
+        "namespaceId": "49b48001-ca20-4adc-8111-5b60c903a50c"
+      },
+      {
+        "bit": 2,
+        "displayName": "Administer Service Connection",
+        "name": "Administer",
+        "namespaceId": "49b48001-ca20-4adc-8111-5b60c903a50c"
+      },
+      {
+        "bit": 4,
+        "displayName": "Create Service Connection",
+        "name": "Create",
+        "namespaceId": "49b48001-ca20-4adc-8111-5b60c903a50c"
+      },
+      {
+        "bit": 8,
+        "displayName": "View Authorization",
+        "name": "ViewAuthorization",
+        "namespaceId": "49b48001-ca20-4adc-8111-5b60c903a50c"
+      },
+      {
+        "bit": 16,
+        "displayName": "View Service Connection",
+        "name": "ViewEndpoint",
+        "namespaceId": "49b48001-ca20-4adc-8111-5b60c903a50c"
+      }
+    ]
+  ]

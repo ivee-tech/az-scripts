@@ -1,0 +1,38 @@
+parameters:
+- name: azureSubscription
+  type: string
+- name: resourceGroup
+  type: string
+- name: aksClusterName
+  type: string
+- name: acrFqdnName
+  type: string
+- name: imagePullSecretName
+  type: string
+- name: templateFilePath
+  type: string
+- name: deploymentName
+  type: string
+- name: imageName
+  type: string
+- name: imageTag
+  type: string
+
+steps:
+  # - template: clone-infra.yml
+  - task: 4tecture.Tokenizer.Tokenizer.Tokenizer@0
+    displayName: Tokenizer
+    inputs:
+      sourceFilesPattern: '${{ parameters.templateFilePath }}'   
+  - task: Kubernetes@1
+    displayName: 'Create Deployments & Services in AKS'
+    inputs:
+      connectionType: 'Azure Resource Manager'
+      azureSubscriptionEndpoint: '${{ parameters.azureSubscription }}'
+      azureResourceGroup: '${{ parameters.resourceGroup }}'
+      kubernetesCluster: '${{ parameters.aksClusterName }}'
+      command: apply
+      useConfigurationFile: true
+      configuration: '${{ parameters.templateFilePath }}'
+      azureSubscriptionEndpointForSecrets: '${{ parameters.azureSubscription }}' # same subscription
+      versionSpec: 1.16.10 # check kubectl available version

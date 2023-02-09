@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/windows/servercore:ltsc2019 AS os-env
+
+ARG AZP_URL
+ARG AZP_TOKEN
+
+# WORKDIR /downloads
+
+# RUN curl --output dotnet-sdk-3.1.402-win-x64.exe https://download.visualstudio.microsoft.com/download/pr/53f250a1-318f-4350-8bda-3c6e49f40e76/e8cbbd98b08edd6222125268166cfc43/dotnet-sdk-3.0.100-win-x64.exe
+# RUN C:\downloads\dotnet-sdk-3.1.402-win-x64.exe /quiet /install
+
+WORKDIR /azp
+
+COPY install.ps1 .
+RUN powershell .\install.ps1 -AZP_URL %AZP_URL% -AZP_TOKEN %AZP_TOKEN%
+
+COPY start.ps1 .
+
+CMD powershell .\start.ps1

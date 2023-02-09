@@ -1,0 +1,647 @@
+{
+    "source": 2,
+    "revision": 6,
+    "description": null,
+    "isDeleted": false,
+    "variables": {},
+    "variableGroups": [],
+    "environments": [
+        {
+            "id": 2,
+            "name": "Dev",
+            "rank": 1,
+            "owner": {
+                "id": ""
+            },
+            "variables": {},
+            "variableGroups": [],
+            "preDeployApprovals": {
+                "approvals": [
+                    {
+                        "rank": 1,
+                        "isAutomated": true,
+                        "isNotificationOn": false,
+                        "id": 4
+                    }
+                ],
+                "approvalOptions": {
+                    "requiredApproverCount": null,
+                    "releaseCreatorCanBeApprover": false,
+                    "autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped": false,
+                    "enforceIdentityRevalidation": false,
+                    "timeoutInMinutes": 0,
+                    "executionOrder": 1
+                }
+            },
+            "deployStep": {
+                "id": 5
+            },
+            "postDeployApprovals": {
+                "approvals": [
+                    {
+                        "rank": 1,
+                        "isAutomated": true,
+                        "isNotificationOn": false,
+                        "id": 6
+                    }
+                ],
+                "approvalOptions": {
+                    "requiredApproverCount": null,
+                    "releaseCreatorCanBeApprover": false,
+                    "autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped": false,
+                    "enforceIdentityRevalidation": false,
+                    "timeoutInMinutes": 0,
+                    "executionOrder": 2
+                }
+            },
+            "deployPhases": [
+                {
+                    "deploymentInput": {
+                        "parallelExecution": {
+                            "parallelExecutionType": 0
+                        },
+                        "agentSpecification": {
+                            "identifier": "windows-2019"
+                        },
+                        "skipArtifactsDownload": false,
+                        "artifactsDownloadInput": {
+                            "downloadInputs": []
+                        },
+                        "queueId": 514,
+                        "demands": [],
+                        "enableAccessToken": false,
+                        "timeoutInMinutes": 0,
+                        "jobCancelTimeoutInMinutes": 1,
+                        "condition": "succeeded()",
+                        "overrideInputs": {}
+                    },
+                    "rank": 1,
+                    "phaseType": 1,
+                    "name": "Run on agent",
+                    "refName": null,
+                    "workflowTasks": [
+                        {
+                            "environment": {},
+                            "taskId": "497d490f-eea7-4f2b-ab94-48d9c1acdcb1",
+                            "version": "4.*",
+                            "name": "Deploy Azure App Service",
+                            "refName": "",
+                            "enabled": true,
+                            "alwaysRun": false,
+                            "continueOnError": false,
+                            "timeoutInMinutes": 0,
+                            "definitionType": null,
+                            "overrideInputs": {},
+                            "condition": "succeeded()",
+                            "inputs": {
+                                "ConnectionType": "AzureRM",
+                                "ConnectedServiceName": "$(Parameters.ConnectedServiceName)",
+                                "PublishProfilePath": "$(System.DefaultWorkingDirectory)/**/*.pubxml",
+                                "PublishProfilePassword": "",
+                                "WebAppKind": "$(Parameters.WebAppKind)",
+                                "WebAppName": "$(Parameters.WebAppName)",
+                                "DeployToSlotOrASEFlag": "false",
+                                "ResourceGroupName": "",
+                                "SlotName": "production",
+                                "DockerNamespace": "$(Parameters.DockerNamespace)",
+                                "DockerRepository": "$(Parameters.DockerRepository)",
+                                "DockerImageTag": "$(Build.BuildId)",
+                                "VirtualApplication": "",
+                                "Package": "$(System.DefaultWorkingDirectory)/**/*.zip",
+                                "RuntimeStack": "",
+                                "RuntimeStackFunction": "",
+                                "StartupCommand": "$(Parameters.StartupCommand)",
+                                "ScriptType": "",
+                                "InlineScript": "",
+                                "ScriptPath": "",
+                                "WebConfigParameters": "",
+                                "AppSettings": "",
+                                "ConfigurationSettings": "",
+                                "UseWebDeploy": "false",
+                                "DeploymentType": "webDeploy",
+                                "TakeAppOfflineFlag": "true",
+                                "SetParametersFile": "",
+                                "RemoveAdditionalFilesFlag": "false",
+                                "ExcludeFilesFromAppDataFlag": "false",
+                                "AdditionalArguments": "",
+                                "RenameFilesFlag": "true",
+                                "XmlTransformation": "false",
+                                "XmlVariableSubstitution": "false",
+                                "JSONFiles": ""
+                            }
+                        }
+                    ]
+                }
+            ],
+            "environmentOptions": {
+                "emailNotificationType": "OnlyOnFailure",
+                "emailRecipients": "release.environment.owner;release.creator",
+                "skipArtifactsDownload": false,
+                "timeoutInMinutes": 0,
+                "enableAccessToken": false,
+                "publishDeploymentStatus": true,
+                "badgeEnabled": false,
+                "autoLinkWorkItems": false,
+                "pullRequestDeploymentEnabled": false
+            },
+            "demands": [],
+            "conditions": [
+                {
+                    "name": "ReleaseStarted",
+                    "conditionType": 1,
+                    "value": ""
+                }
+            ],
+            "executionPolicy": {
+                "concurrencyCount": 1,
+                "queueDepthCount": 0
+            },
+            "schedules": [],
+            "retentionPolicy": {
+                "daysToKeep": 30,
+                "releasesToKeep": 3,
+                "retainBuild": true
+            },
+            "processParameters": {
+                "inputs": [
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {},
+                        "name": "ConnectedServiceName",
+                        "label": "Azure subscription",
+                        "defaultValue": "123dce7d-ae0d-47dd-896d-ca1b29c07655",
+                        "required": true,
+                        "type": "connectedService:AzureRM",
+                        "helpMarkDown": "Select the Azure Resource Manager subscription for the deployment.",
+                        "visibleRule": "",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {
+                            "webApp": "Web App on Windows",
+                            "webAppLinux": "Web App on Linux",
+                            "webAppContainer": "Web App for Containers (Linux)",
+                            "functionApp": "Function App on Windows",
+                            "functionAppLinux": "Function App on Linux",
+                            "functionAppContainer": "Function App for Containers (Linux)",
+                            "apiApp": "API App",
+                            "mobileApp": "Mobile App"
+                        },
+                        "properties": {
+                            "EditableOptions": "false"
+                        },
+                        "name": "WebAppKind",
+                        "label": "App type",
+                        "defaultValue": "webApp",
+                        "type": "pickList",
+                        "helpMarkDown": "",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {
+                            "EditableOptions": "True"
+                        },
+                        "name": "WebAppName",
+                        "label": "App service name",
+                        "defaultValue": "det-info-mgmt-test",
+                        "required": true,
+                        "type": "pickList",
+                        "helpMarkDown": "Enter or select the name of an existing Azure App Service.",
+                        "visibleRule": "",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {},
+                        "name": "DockerNamespace",
+                        "label": "Registry or Namespace",
+                        "defaultValue": "",
+                        "required": true,
+                        "type": "string",
+                        "helpMarkDown": "A globally unique top-level domain name for your specific registry or namespace.<br/> Note: Fully qualified image name will be of the format: '<b>`<registry or namespace`></b>/`<repository`>:`<tag`>'. For example, '<b>myregistry.azurecr.io</b>/nginx:latest'.",
+                        "visibleRule": "WebAppKind = webAppContainer || WebAppkind = functionAppContainer",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {},
+                        "name": "DockerRepository",
+                        "label": "Repository",
+                        "defaultValue": "",
+                        "required": true,
+                        "type": "string",
+                        "helpMarkDown": "Name of the repository where the container images are stored.<br/> Note: Fully qualified image name will be of the format: '`<registry or namespace`>/<b>`<repository`></b>:`<tag`>'. For example, 'myregistry.azurecr.io/<b>nginx</b>:latest'.",
+                        "visibleRule": "WebAppKind = webAppContainer || WebAppkind = functionAppContainer",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {},
+                        "name": "StartupCommand",
+                        "label": "Startup command",
+                        "defaultValue": "",
+                        "type": "string",
+                        "helpMarkDown": "Enter the start up command. For ex.<br/>dotnet run<br/>dotnet filename.dll",
+                        "visibleRule": "WebAppKind = webAppLinux || WebAppKind = webAppContainer || WebAppkind = functionAppContainer || WebAppKind = functionAppLinux",
+                        "groupName": ""
+                    }
+                ],
+                "dataSourceBindings": [
+                    {
+                        "dataSourceName": "AzureRMWebAppNamesByAppType",
+                        "parameters": {
+                            "WebAppKind": "$(WebAppKind)"
+                        },
+                        "endpointId": "$(ConnectedServiceName)",
+                        "target": "WebAppName"
+                    }
+                ]
+            },
+            "properties": {
+                "BoardsEnvironmentType": {
+                    "$type": "System.String",
+                    "$value": "unmapped"
+                },
+                "LinkBoardsWorkItems": {
+                    "$type": "System.String",
+                    "$value": "False"
+                }
+            },
+            "preDeploymentGates": {
+                "id": 0,
+                "gatesOptions": null,
+                "gates": []
+            },
+            "postDeploymentGates": {
+                "id": 0,
+                "gatesOptions": null,
+                "gates": []
+            },
+            "environmentTriggers": []
+        },
+        {
+            "id": 3,
+            "name": "Test",
+            "rank": 2,
+            "owner": {
+                "id": ""
+            },
+            "variables": {},
+            "variableGroups": [],
+            "preDeployApprovals": {
+                "approvals": [
+                    {
+                        "rank": 1,
+                        "isAutomated": false,
+                        "isNotificationOn": false,
+                        "approver": {
+                            "id": ""
+                        },
+                        "id": 7
+                    }
+                ],
+                "approvalOptions": {
+                    "requiredApproverCount": null,
+                    "releaseCreatorCanBeApprover": false,
+                    "autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped": false,
+                    "enforceIdentityRevalidation": true,
+                    "timeoutInMinutes": 0,
+                    "executionOrder": 1
+                }
+            },
+            "deployStep": {
+                "id": 8
+            },
+            "postDeployApprovals": {
+                "approvals": [
+                    {
+                        "rank": 1,
+                        "isAutomated": true,
+                        "isNotificationOn": false,
+                        "id": 9
+                    }
+                ],
+                "approvalOptions": {
+                    "requiredApproverCount": null,
+                    "releaseCreatorCanBeApprover": false,
+                    "autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped": false,
+                    "enforceIdentityRevalidation": false,
+                    "timeoutInMinutes": 0,
+                    "executionOrder": 2
+                }
+            },
+            "deployPhases": [
+                {
+                    "deploymentInput": {
+                        "parallelExecution": {
+                            "parallelExecutionType": 0
+                        },
+                        "agentSpecification": {
+                            "identifier": "windows-2019"
+                        },
+                        "skipArtifactsDownload": false,
+                        "artifactsDownloadInput": {
+                            "downloadInputs": []
+                        },
+                        "queueId": 514,
+                        "demands": [],
+                        "enableAccessToken": false,
+                        "timeoutInMinutes": 0,
+                        "jobCancelTimeoutInMinutes": 1,
+                        "condition": "succeeded()",
+                        "overrideInputs": {}
+                    },
+                    "rank": 1,
+                    "phaseType": 1,
+                    "name": "Run on agent",
+                    "refName": null,
+                    "workflowTasks": [
+                        {
+                            "environment": {},
+                            "taskId": "497d490f-eea7-4f2b-ab94-48d9c1acdcb1",
+                            "version": "4.*",
+                            "name": "Deploy Azure App Service",
+                            "refName": "",
+                            "enabled": true,
+                            "alwaysRun": false,
+                            "continueOnError": false,
+                            "timeoutInMinutes": 0,
+                            "definitionType": null,
+                            "overrideInputs": {},
+                            "condition": "succeeded()",
+                            "inputs": {
+                                "ConnectionType": "AzureRM",
+                                "ConnectedServiceName": "$(Parameters.ConnectedServiceName)",
+                                "PublishProfilePath": "$(System.DefaultWorkingDirectory)/**/*.pubxml",
+                                "PublishProfilePassword": "",
+                                "WebAppKind": "$(Parameters.WebAppKind)",
+                                "WebAppName": "$(Parameters.WebAppName)",
+                                "DeployToSlotOrASEFlag": "false",
+                                "ResourceGroupName": "",
+                                "SlotName": "production",
+                                "DockerNamespace": "$(Parameters.DockerNamespace)",
+                                "DockerRepository": "$(Parameters.DockerRepository)",
+                                "DockerImageTag": "$(Build.BuildId)",
+                                "VirtualApplication": "",
+                                "Package": "$(System.DefaultWorkingDirectory)/**/*.zip",
+                                "RuntimeStack": "",
+                                "RuntimeStackFunction": "",
+                                "StartupCommand": "$(Parameters.StartupCommand)",
+                                "ScriptType": "",
+                                "InlineScript": "",
+                                "ScriptPath": "",
+                                "WebConfigParameters": "",
+                                "AppSettings": "",
+                                "ConfigurationSettings": "",
+                                "UseWebDeploy": "false",
+                                "DeploymentType": "webDeploy",
+                                "TakeAppOfflineFlag": "true",
+                                "SetParametersFile": "",
+                                "RemoveAdditionalFilesFlag": "false",
+                                "ExcludeFilesFromAppDataFlag": "false",
+                                "AdditionalArguments": "",
+                                "RenameFilesFlag": "true",
+                                "XmlTransformation": "false",
+                                "XmlVariableSubstitution": "false",
+                                "JSONFiles": ""
+                            }
+                        }
+                    ]
+                }
+            ],
+            "environmentOptions": {
+                "emailNotificationType": "OnlyOnFailure",
+                "emailRecipients": "release.environment.owner;release.creator",
+                "skipArtifactsDownload": false,
+                "timeoutInMinutes": 0,
+                "enableAccessToken": false,
+                "publishDeploymentStatus": true,
+                "badgeEnabled": false,
+                "autoLinkWorkItems": false,
+                "pullRequestDeploymentEnabled": false
+            },
+            "demands": [],
+            "conditions": [
+                {
+                    "name": "Dev",
+                    "conditionType": 2,
+                    "value": "4"
+                }
+            ],
+            "executionPolicy": {
+                "concurrencyCount": 1,
+                "queueDepthCount": 0
+            },
+            "schedules": [],
+            "retentionPolicy": {
+                "daysToKeep": 30,
+                "releasesToKeep": 3,
+                "retainBuild": true
+            },
+            "processParameters": {
+                "inputs": [
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {},
+                        "name": "ConnectedServiceName",
+                        "label": "Azure subscription",
+                        "defaultValue": "6f19e296-dccd-423b-ad6e-62d30706ee94",
+                        "required": true,
+                        "type": "connectedService:AzureRM",
+                        "helpMarkDown": "Select the Azure Resource Manager subscription for the deployment.",
+                        "visibleRule": "",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {
+                            "webApp": "Web App on Windows",
+                            "webAppLinux": "Web App on Linux",
+                            "webAppContainer": "Web App for Containers (Linux)",
+                            "functionApp": "Function App on Windows",
+                            "functionAppLinux": "Function App on Linux",
+                            "functionAppContainer": "Function App for Containers (Linux)",
+                            "apiApp": "API App",
+                            "mobileApp": "Mobile App"
+                        },
+                        "properties": {
+                            "EditableOptions": "false"
+                        },
+                        "name": "WebAppKind",
+                        "label": "App type",
+                        "defaultValue": "webApp",
+                        "type": "pickList",
+                        "helpMarkDown": "",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {
+                            "EditableOptions": "True"
+                        },
+                        "name": "WebAppName",
+                        "label": "App service name",
+                        "defaultValue": "det-info-mgmt",
+                        "required": true,
+                        "type": "pickList",
+                        "helpMarkDown": "Enter or select the name of an existing Azure App Service.",
+                        "visibleRule": "",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {},
+                        "name": "DockerNamespace",
+                        "label": "Registry or Namespace",
+                        "defaultValue": "",
+                        "required": true,
+                        "type": "string",
+                        "helpMarkDown": "A globally unique top-level domain name for your specific registry or namespace.<br/> Note: Fully qualified image name will be of the format: '<b>`<registry or namespace`></b>/`<repository`>:`<tag`>'. For example, '<b>myregistry.azurecr.io</b>/nginx:latest'.",
+                        "visibleRule": "WebAppKind = webAppContainer || WebAppkind = functionAppContainer",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {},
+                        "name": "DockerRepository",
+                        "label": "Repository",
+                        "defaultValue": "",
+                        "required": true,
+                        "type": "string",
+                        "helpMarkDown": "Name of the repository where the container images are stored.<br/> Note: Fully qualified image name will be of the format: '`<registry or namespace`>/<b>`<repository`></b>:`<tag`>'. For example, 'myregistry.azurecr.io/<b>nginx</b>:latest'.",
+                        "visibleRule": "WebAppKind = webAppContainer || WebAppkind = functionAppContainer",
+                        "groupName": ""
+                    },
+                    {
+                        "aliases": [],
+                        "options": {},
+                        "properties": {},
+                        "name": "StartupCommand",
+                        "label": "Startup command",
+                        "defaultValue": "",
+                        "type": "string",
+                        "helpMarkDown": "Enter the start up command. For ex.<br/>dotnet run<br/>dotnet filename.dll",
+                        "visibleRule": "WebAppKind = webAppLinux || WebAppKind = webAppContainer || WebAppkind = functionAppContainer || WebAppKind = functionAppLinux",
+                        "groupName": ""
+                    }
+                ],
+                "dataSourceBindings": [
+                    {
+                        "dataSourceName": "AzureRMWebAppNamesByAppType",
+                        "parameters": {
+                            "WebAppKind": "$(WebAppKind)"
+                        },
+                        "endpointId": "$(ConnectedServiceName)",
+                        "target": "WebAppName"
+                    }
+                ]
+            },
+            "properties": {
+                "BoardsEnvironmentType": {
+                    "$type": "System.String",
+                    "$value": "unmapped"
+                },
+                "LinkBoardsWorkItems": {
+                    "$type": "System.String",
+                    "$value": "False"
+                }
+            },
+            "preDeploymentGates": {
+                "id": 0,
+                "gatesOptions": null,
+                "gates": []
+            },
+            "postDeploymentGates": {
+                "id": 0,
+                "gatesOptions": null,
+                "gates": []
+            },
+            "environmentTriggers": []
+        }
+    ],
+    "artifacts": [
+        {
+            "sourceId": "17da9f55-5b3b-43b0-9dc5-df06b503c6a9:57",
+            "type": "Build",
+            "alias": "_MyBuild-001",
+            "definitionReference": {
+                "defaultVersionBranch": {
+                    "id": "",
+                    "name": ""
+                },
+                "defaultVersionSpecific": {
+                    "id": "",
+                    "name": ""
+                },
+                "defaultVersionTags": {
+                    "id": "",
+                    "name": ""
+                },
+                "defaultVersionType": {
+                    "id": "latestType",
+                    "name": "Latest"
+                },
+                "definition": {
+                    "id": "57",
+                    "name": "MyBuild-001"
+                },
+                "definitions": {
+                    "id": "",
+                    "name": ""
+                },
+                "IsMultiDefinitionType": {
+                    "id": "False",
+                    "name": "False"
+                },
+                "project": {
+                    "id": "17da9f55-5b3b-43b0-9dc5-df06b503c6a9",
+                    "name": "project-001"
+                },
+                "repository": {
+                    "id": "",
+                    "name": ""
+                }
+            },
+            "isPrimary": true,
+            "isRetained": false
+        }
+    ],
+    "triggers": [
+        {
+            "artifactAlias": "_MyBuild-001",
+            "triggerConditions": [],
+            "triggerType": 1
+        }
+    ],
+    "releaseNameFormat": "Release-$(rev:r)",
+    "tags": [],
+    "properties": {
+        "DefinitionCreationSource": {
+            "$type": "System.String",
+            "$value": "ReleaseNew"
+        },
+        "IntegrateBoardsWorkItems": {
+            "$type": "System.String",
+            "$value": "False"
+        },
+        "IntegrateJiraWorkItems": {
+            "$type": "System.String",
+            "$value": "false"
+        }
+    },
+    "id": 2,
+    "name": "template-ASPNETCore-stages-CD",
+    "path": "\\",
+    "projectReference": null
+}

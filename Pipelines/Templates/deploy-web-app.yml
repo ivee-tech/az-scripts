@@ -1,0 +1,17 @@
+parameters:
+- name: azureSubscription
+  type: string
+- name: appName
+  type: string
+- name: webProjName
+  type: string
+
+steps:
+- download: current
+  artifact: ${{ parameters.webProjName }}
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Deploy Azure App Service'
+  inputs:
+    azureSubscription: '${{ parameters.azureSubscription }}'
+    WebAppName: '${{ parameters.appName }}'
+    packageForLinux: '$(Pipeline.Workspace)/${{ parameters.webProjName }}/${{ parameters.webProjName }}.zip'

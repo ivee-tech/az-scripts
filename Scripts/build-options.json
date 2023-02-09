@@ -1,0 +1,71 @@
+{
+    "count": 2,
+    "value": [
+        {
+            "ordinal": 50,
+            "name": "Automatically link new work in this build",
+            "description": "When a build completes successfully, create links to all work items linked to associated changes.",
+            "inputs": [
+                {
+                    "options": {},
+                    "help": {},
+                    "name": "branchFilters",
+                    "label": "Only link to work added to specific branches",
+                    "defaultValue": "[\"+refs/heads/*\"]",
+                    "type": "branchFilter"
+                }
+            ],
+            "groups": [],
+            "id": "5d58cc01-7c75-450c-be18-a388ddb129ec"
+        },
+        {
+            "ordinal": 100,
+            "name": "Create work item on failure",
+            "description": "Create a work item for each failed build",
+            "inputs": [
+                {
+                    "options": {
+                        "Bug": "Bug",
+                        "Epic": "Epic",
+                        "Feature": "Feature",
+                        "Task": "Task",
+                        "Test Case": "Test Case",
+                        "User Story": "User Story",
+                        "Issue": "Issue"
+                    },
+                    "help": {
+                        "markdown": "The type of work item to create"
+                    },
+                    "name": "workItemType",
+                    "label": "Type",
+                    "defaultValue": "Bug",
+                    "required": true,
+                    "type": "pickList"
+                },
+                {
+                    "options": {},
+                    "help": {
+                        "markdown": "Assign the work item to the requestor"
+                    },
+                    "name": "assignToRequestor",
+                    "label": "Assign to requestor",
+                    "defaultValue": "true",
+                    "required": true,
+                    "type": "boolean"
+                },
+                {
+                    "options": {},
+                    "help": {
+                        "markdown": "Additional fields to set when creating the Work Item. <br/><br/>For example, \"System.Title\" = \"Build $(build.buildNumber) failed\" will format the Work Item title, and \"System.Reason\" = \"Build failure\" will set the reason."
+                    },
+                    "name": "additionalFields",
+                    "label": "Additional fields",
+                    "defaultValue": "{}",
+                    "type": "string"
+                }
+            ],
+            "groups": [],
+            "id": "a9db38f9-9fdc-478c-b0f9-464221e58316"
+        }
+    ]
+}

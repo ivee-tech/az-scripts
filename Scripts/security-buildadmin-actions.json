@@ -1,0 +1,28 @@
+[
+  [
+    {
+      "bit": 1,
+      "displayName": "View build resources",
+      "name": "ViewBuildResources",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 2,
+      "displayName": "Manage build resources",
+      "name": "ManageBuildResources",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 4,
+      "displayName": "Use build resources",
+      "name": "UseBuildResources",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "bit": 8,
+      "displayName": "Administer build resource permissions",
+      "name": "AdministerBuildResourcePermissions",
+      "namespaceId": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+]

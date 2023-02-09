@@ -1,0 +1,37 @@
+# FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build-env
+FROM registry.access.redhat.com/ubi8/dotnet-50 AS build-env
+WORKDIR /app
+
+# Copy csproj and restore as distinct layers
+COPY ETSDemo.App/* ./
+RUN dotnet restore
+
+# RUN dotnet build
+
+# Copy everything else and build
+#COPY ../engine/examples ./
+RUN dotnet publish -c Release -o out -r linux-x64
+
+# another hack to solve https://github.com/dotnet/aspnetcore/issues/27232
+RUN mkdir out/Views && find . -name '*.cshtml' -not -path "*/out/*" | xargs cp --parents -t out/Views
+
+
+# Build runtime image
+# FROM mcr.microsoft.com/dotnet/aspnet:3.1
+FROM registry.access.redhat.com/ubi8/dotnet-50-runtime
+WORKDIR /app
+COPY --from=build-env /app/out .
+
+# RUN mkdir ./Views  
+# /app/Shared /app/Home
+
+
+# hack to solve https://github.com/dotnet/aspnetcore/issues/27232
+#COPY --from=build-env /app/*.cshtml .
+#COPY --from=build-env /app/Shared/*.cshtml ./Shared/
+#COPY --from=build-env /app/Home/*.cshtml ./Home/
+
+# COPY --from=build-env /app/out/Views /Views
+ENTRYPOINT ["dotnet", "ETSDemo.App.dll"]
+# CMD ["dotnet", "ETSDemo.App.dll"]
+

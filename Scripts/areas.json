@@ -1,0 +1,56 @@
+{
+    "name": "Team 1",
+    "path": "",
+    "children": [
+        {
+            "name": "DB",
+            "path": "Team 1",
+            "children": [
+                {
+                    "name": "SQL",
+                    "path": "Team 1/DB"
+                },
+                {
+                    "name": "MongoDB",
+                    "path": "Team 1/DB"
+                }
+            ]
+        },
+        {
+            "name": "API",
+            "path": "Team 1",
+            "children": [
+                {
+                    "name": ".NET",
+                    "path": "Team 1/API"
+                },
+                {
+                    "name": "Java",
+                    "path": "Team 1/API"
+                },
+                {
+                    "name": "Node",
+                    "path": "Team 1/API"
+                }
+            ]
+        },
+        {
+            "name": "UI",
+            "path": "Team 1",
+            "children": [
+                {
+                    "name": "ASP.NET MVC",
+                    "path": "Team 1/UI"
+                },
+                {
+                    "name": "React",
+                    "path": "Team 1/UI"
+                },
+                {
+                    "name": "Blazor",
+                    "path": "Team 1/UI"
+                }
+            ]
+        }
+    ]
+}

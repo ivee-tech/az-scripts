@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+  dockeragent-win:
+    build:
+      context: .
+      args:
+        AZP_URL: https://dev.azure.com/daradu
+        AZP_TOKEN: ***
+    image: dockeragent-win
+    restart: "no"

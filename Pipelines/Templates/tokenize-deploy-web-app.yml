@@ -1,0 +1,29 @@
+parameters:
+- name: azureSubscription
+  type: string
+- name: appName
+  type: string
+- name: webProjName
+  type: string
+
+steps:
+- download: current
+  artifact: ${{ parameters.webProjName }}
+- task: solidify-labs.vsts-task-tokenize-in-archive.Tokenize-In-Archive-Task.TokenizeInArchiveTask@1
+  displayName: 'Tokenize in appsettings.json in *.zip'
+  inputs:
+    PathToArchives: '$(Pipeline.Workspace)/${{ parameters.webProjName }}'
+    FilesToTokenize: appsettings.json
+    ReplaceWithEmpty: true
+- task: solidify-labs.vsts-task-tokenize-in-archive.Tokenize-In-Archive-Task.TokenizeInArchiveTask@1
+  displayName: 'Tokenize in web.config in *.zip'
+  inputs:
+    PathToArchives: '$(Pipeline.Workspace)/${{ parameters.webProjName }}'
+    FilesToTokenize: web.config
+    ReplaceWithEmpty: true
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Deploy Azure App Service'
+  inputs:
+    azureSubscription: '${{ parameters.azureSubscription }}'
+    WebAppName: '${{ parameters.appName }}'
+    packageForLinux: '$(Pipeline.Workspace)/${{ parameters.webProjName }}/${{ parameters.webProjName }}.zip'

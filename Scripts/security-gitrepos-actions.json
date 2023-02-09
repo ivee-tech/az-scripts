@@ -1,0 +1,100 @@
+[
+  [
+    {
+      "bit": 1,
+      "displayName": "Administer",
+      "name": "Administer",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 2,
+      "displayName": "Read",
+      "name": "GenericRead",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 4,
+      "displayName": "Contribute",
+      "name": "GenericContribute",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 8,
+      "displayName": "Force push (rewrite history, delete branches and tags)",
+      "name": "ForcePush",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 16,
+      "displayName": "Create branch",
+      "name": "CreateBranch",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 32,
+      "displayName": "Create tag",
+      "name": "CreateTag",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 64,
+      "displayName": "Manage notes",
+      "name": "ManageNote",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 128,
+      "displayName": "Bypass policies when pushing",
+      "name": "PolicyExempt",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 256,
+      "displayName": "Create repository",
+      "name": "CreateRepository",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 512,
+      "displayName": "Delete repository",
+      "name": "DeleteRepository",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 1024,
+      "displayName": "Rename repository",
+      "name": "RenameRepository",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 2048,
+      "displayName": "Edit policies",
+      "name": "EditPolicies",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 4096,
+      "displayName": "Remove others' locks",
+      "name": "RemoveOthersLocks",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 8192,
+      "displayName": "Manage permissions",
+      "name": "ManagePermissions",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 16384,
+      "displayName": "Contribute to pull requests",
+      "name": "PullRequestContribute",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    },
+    {
+      "bit": 32768,
+      "displayName": "Bypass policies when completing pull requests",
+      "name": "PullRequestBypassPolicy",
+      "namespaceId": "2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87"
+    }
+  ]
+]

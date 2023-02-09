@@ -1,0 +1,54 @@
+parameters:
+- name: azureSubscription
+  type: string
+- name: azureSubscriptionId
+  type: string
+- name: resourceGroup
+  type: string
+- name: acrName
+  type: string
+- name: dockerComposeFilePath
+  type: string
+- name: imageTag
+  type: string
+- name: buildImage
+  type: boolean
+
+steps:
+  - task: 4tecture.Tokenizer.Tokenizer.Tokenizer@0
+    displayName: Tokenizer
+    inputs:
+      sourceFilesPattern: '${{ parameters.dockerComposeFilePath }}'   
+  - task: DockerCompose@0
+    condition: eq(${{ parameters.buildImage }}, true)
+    displayName: 'Build services'
+    inputs:
+      action: Build services
+      azureSubscriptionEndpoint: '${{ parameters.azureSubscription }}'
+      azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.azureSubscriptionId }}/resourceGroups/${{ parameters.resourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
+      dockerComposeFile: '${{ parameters.dockerComposeFilePath }}'
+      dockerComposeFileArgs: 'DOCKER_BUILD_SOURCE='
+      additionalImageTags: '${{ parameters.imageTag }}'
+  - task: DockerCompose@0
+    displayName: 'Push services'
+    inputs:
+      action: Push services
+      azureSubscriptionEndpoint: '${{ parameters.azureSubscription }}'
+      azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.azureSubscriptionId }}/resourceGroups/${{ parameters.resourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
+      dockerComposeFile: '${{ parameters.dockerComposeFilePath }}'
+      dockerComposeFileArgs: 'DOCKER_BUILD_SOURCE='
+      qualifyImageNames: true
+      additionalImageTags: '${{ parameters.imageTag }}'
+  - task: DockerCompose@0
+    displayName: 'Lock services'
+    inputs:
+      action: Lock services
+      azureSubscriptionEndpoint: '${{ parameters.azureSubscription }}'
+      azureContainerRegistry: '{"loginServer":"${{ parameters.acrName }}.azurecr.io", "id" : "/subscriptions/${{ parameters.azureSubscriptionId }}/resourceGroups/${{ parameters.resourceGroup }}/providers/Microsoft.ContainerRegistry/registries/${{ parameters.acrName }}"}'
+      dockerComposeFile: '${{ parameters.dockerComposeFilePath }}'
+      dockerComposeFileArgs: 'DOCKER_BUILD_SOURCE='
+      qualifyImageNames: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      ArtifactName: deploy        

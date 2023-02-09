@@ -1,0 +1,110 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "apiVersion": "2021-06-01",
+            "name": "daff-afd-002",
+            "location": "Global",
+            "properties": {
+                "frontDoorId": null,
+                "originResponseTimeoutSeconds": 60
+            },
+            "tags": {},
+            "sku": {
+                "name": "Standard_AzureFrontDoor"
+            },
+            "type": "Microsoft.Cdn/Profiles"
+        },
+        {
+            "apiVersion": "2021-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles', 'daff-afd-002')]"
+            ],
+            "name": "daff-afd-002/daff-fd-002",
+            "location": "Global",
+            "properties": {
+                "hostName": "daff-fd-002-byamf3fvg7hbcugs.z01.azurefd.net",
+                "enabledState": "Enabled",
+                "deploymentStatus": null
+            },
+            "type": "Microsoft.Cdn/Profiles/AfdEndpoints"
+        },
+        {
+            "apiVersion": "2021-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles', 'daff-afd-002')]"
+            ],
+            "name": "daff-afd-002/origin1",
+            "properties": {
+                "loadBalancingSettings": {
+                    "sampleSize": 4,
+                    "successfulSamplesRequired": 3,
+                    "additionalLatencyInMilliseconds": 50
+                },
+                "healthProbeSettings": {
+                    "probePath": "/",
+                    "probeRequestType": "HEAD",
+                    "probeProtocol": "Http",
+                    "probeIntervalInSeconds": 100
+                },
+                "trafficRestorationTimeToHealedOrNewEndpointsInMinutes": null,
+                "sessionAffinityState": "Disabled",
+                "deploymentStatus": null
+            },
+            "type": "Microsoft.Cdn/Profiles/OriginGroups"
+        },
+        {
+            "apiVersion": "2021-06-01",
+            "name": "daff-afd-002/origin1/ets-demo-test-origin",
+            "properties": {
+                "hostName": "ets-demo-test.azurewebsites.net",
+                "httpPort": 80,
+                "httpsPort": 443,
+                "originHostHeader": "ets-demo-test.azurewebsites.net",
+                "priority": 1,
+                "weight": 1000,
+                "enforceCertificateNameCheck": true,
+                "sharedPrivateLinkResource": null,
+                "enabledState": "Enabled",
+                "deploymentStatus": null
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles/OriginGroups', 'daff-afd-002', 'origin1')]"
+            ],
+            "type": "Microsoft.Cdn/Profiles/OriginGroups/Origins"
+        },
+        {
+            "apiVersion": "2021-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles/AfdEndpoints', 'daff-afd-002', 'daff-fd-002')]",
+                "[resourceId('Microsoft.Cdn/Profiles/OriginGroups', 'daff-afd-002', 'origin1')]",
+                "[resourceId('Microsoft.Cdn/Profiles/OriginGroups/Origins', 'daff-afd-002', 'origin1', 'ets-demo-test-origin')]"
+            ],
+            "name": "daff-afd-002/daff-fd-002/route1",
+            "properties": {
+                "customDomains": [],
+                "originGroup": {
+                    "id": "/subscriptions/6b40a9d0-1170-453b-acfb-d592bf4339ae/resourceGroups/daff-demo/providers/Microsoft.Cdn/profiles/daff-afd-002/originGroups/origin1"
+                },
+                "originPath": null,
+                "ruleSets": [],
+                "supportedProtocols": [
+                    "Http",
+                    "Https"
+                ],
+                "patternsToMatch": [
+                    "/calculator"
+                ],
+                "forwardingProtocol": "MatchRequest",
+                "linkToDefaultDomain": "Enabled",
+                "httpsRedirect": "Enabled",
+                "enabledState": "Enabled",
+                "deploymentStatus": null,
+                "provisioningState": null,
+                "cacheConfiguration": null
+            },
+            "type": "Microsoft.Cdn/Profiles/AfdEndpoints/Routes"
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+parameters:
+- name: varGroup
+  type: string
+
+stages:
+- stage: Validate_Publish_ARM_Template
+  variables:
+  - ${{ if eq(parameters.varGroup, 'CCN-invoicing-app') }}:
+    - group: ${{ parameters.varGroup }}
+  jobs:
+  - job: Validate_Publish_ARM_Template_Job
+    steps:
+    - task: AzureResourceGroupDeployment@2
+      displayName: 'Azure Deployment: Validate ARM Template'
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        resourceGroupName: '$(resourceGroup)'
+        location: '$(location)'
+        csmFile: 'Templates/$(sqlArmTemplate)/azuredeploy.json'
+        csmParametersFile: 'Templates/$(sqlArmTemplate)/azuredeploy.parameters.json'
+        deploymentMode: Validation
+
+    - task: CopyFiles@2
+      displayName: 'Copy ARM Templates'
+      inputs:
+        SourceFolder: 'Templates/$(sqlArmTemplate)'
+        Contents: |
+          **/*.json
+          **/*.sh
+          **/*.ps1
+        TargetFolder: '$(build.artifactstagingdirectory)/Templates/$(sqlArmTemplate)'
+        OverWrite: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)/Templates/$(sqlArmTemplate)'
+        ArtifactName: '$(sqlArmTemplate)'
+      condition: succeededOrFailed()

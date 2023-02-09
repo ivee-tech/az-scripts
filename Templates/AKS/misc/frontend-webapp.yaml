@@ -1,0 +1,38 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: demowebapp
+spec:
+  selector:
+    app: demowebapp
+    tier: frontend
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demowebapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demowebapp
+  template:
+    metadata:
+      labels:
+        app: demowebapp
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - name: demowebapp
+          image: "acr9998877.azurecr.io/demo-webapp:30443"
+          ports:
+            - name: http
+              containerPort: 80
+      imagePullSecrets:
+        - name: acr

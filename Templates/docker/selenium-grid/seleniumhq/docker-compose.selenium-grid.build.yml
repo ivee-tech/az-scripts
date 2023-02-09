@@ -1,0 +1,38 @@
+version: '3.4'
+
+services:
+  selenium-hub:
+    build: 
+      context: .
+      dockerfile: ./selenium-hub.dockerfile
+    restart: always
+    # image: selenium/hub:latest
+    ports:
+    - "4444:4444"
+  #selenium-chrome
+  selenium-chrome:
+    restart: always
+    build: 
+      context: .
+      dockerfile: ./selenium-node-chrome.dockerfile
+    # image: selenium/node-chrome-debug
+    stdin_open: true
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - SCREEN_WIDTH=3240
+      - SCREEN_HEIGHT=2160
+    depends_on:
+      - selenium-hub
+  #selenium-firefox
+  selenium-firefox:
+    restart: always
+    build: 
+      context: .
+      dockerfile: ./selenium-node-firefox.dockerfile
+    # image: selenium/node-firefox
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+    depends_on:
+      - selenium-hub

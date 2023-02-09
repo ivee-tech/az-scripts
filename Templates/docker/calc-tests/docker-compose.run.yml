@@ -1,0 +1,6 @@
+version: '3.4'
+services:
+  autotestmate-calculator:
+    restart: "no"
+    image: autotestmate-calculator:latest # autotestmate-samples:latest
+    # command: tail -F anything

@@ -1,0 +1,36 @@
+parameters:
+- name: webProjName
+  type: string
+
+jobs:
+- job: Build_Web_App_UI_Job
+  steps:
+  - task: Npm@1
+    displayName: 'npm install'
+    inputs:
+      workingDir: '${{ parameters.webProjName }}'
+      verbose: false
+  - task: Npm@1
+    displayName: 'npm build'
+    inputs:
+      command: custom
+      workingDir: '${{ parameters.webProjName }}'
+      verbose: false
+      customCommand: 'run predeploy:prod'
+  - task: CopyFiles@2
+    displayName: 'Copy UI Files'
+    inputs:
+      SourceFolder: '${{ parameters.webProjName }}/build'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.webProjName }}'
+      CleanTargetFolder: true
+      OverWrite: true
+  - task: CopyFiles@2
+    displayName: 'Copy web.config'
+    inputs:
+      SourceFolder: '${{ parameters.webProjName }}'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.webProjName }}'
+      Contents: web.config
+      OverWrite: true
+  - publish: '$(Build.ArtifactStagingDirectory)/${{ parameters.webProjName }}'
+    displayName: 'Publish Artifact'
+    artifact: '${{ parameters.webProjName }}'

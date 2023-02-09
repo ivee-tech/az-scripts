@@ -1,0 +1,39 @@
+parameters:
+- name: project
+  type: string
+- name: feed
+  type: string
+- name: buildConfiguration
+  type: string
+- name: connection
+  type: string
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: sdk
+    version: '3.1.x'
+- task: DotNetCoreCLI@2
+  displayName: 'Install dotnet-ef'
+  inputs:
+    command: custom
+    custom: tool
+    arguments: 'install --global dotnet-ef'
+- task: DotNetCoreCLI@2
+  displayName: 'EF dbcontext info'
+  inputs:
+    command: custom
+    custom: ef
+    arguments: 'dbcontext info --project ${{ parameters.project }} --configuration ${{ parameters.buildConfiguration }}'
+  env:
+    Settings-AppConnectionString: ${{ parameters.connection }}
+    ASPNETCORE_ENVIRONMENT: CI
+- task: DotNetCoreCLI@2
+  displayName: 'EF migrate'
+  inputs:
+    command: custom
+    custom: ef
+    arguments: 'database update --project ${{ parameters.project }} --configuration ${{ parameters.buildConfiguration }} --connection "${{ parameters.connection }}"'
+  env:
+    Settings-AppConnectionString: ${{ parameters.connection }}
+    ASPNETCORE_ENVIRONMENT: CI

@@ -1,0 +1,410 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.451.19169",
+      "templateHash": "14778634689889652355"
+    }
+  },
+  "parameters": {
+    "hostingPlanName": {
+      "type": "string",
+      "metadata": {
+        "description": "The plan name for this web application."
+      }
+    },
+    "appName": {
+      "type": "string",
+      "metadata": {
+        "description": "The web application name. It must be unique across all Azure web apps. The application Url is https://[appName].azurewebsites.net"
+      }
+    },
+    "environments": {
+      "type": "array",
+      "defaultValue": [
+        "Staging"
+      ],
+      "maxLength": 19,
+      "metadata": {
+        "description": "Array with the names for the environment slots"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location (region) for all resources."
+      }
+    },
+    "networkResourceGroupName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Required if network components are in a different resource group"
+      }
+    },
+    "networkSubnetName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional, only required if assigning function app to subnet"
+      }
+    },
+    "networkVnetName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional, only required if assigning function app to subnet"
+      }
+    },
+    "omsWorkspaceRG": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource group name for Log Analytic Workspace"
+      }
+    },
+    "omsWorkspaceName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The name for Log Analytic Workspace"
+      }
+    },
+    "runFromPackage": {
+      "type": "string",
+      "defaultValue": "1",
+      "metadata": {
+        "description": "Application run from package"
+      }
+    },
+    "runtimeStack": {
+      "type": "string",
+      "defaultValue": "dotnet",
+      "allowedValues": [
+        "powershell",
+        "dotnet",
+        "node",
+        "java"
+      ],
+      "metadata": {
+        "description": "Pick the language runtime that you want enabled"
+      }
+    },
+    "secretPermissions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Specifies the permissions to secrets in the vault"
+      }
+    },
+    "stagingSlotName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the staging slot if used. Required for blue green / outageless deployments"
+      }
+    },
+    "storageConnectionString": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Storage account connection string"
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "defaultValue": "[subscription().subscriptionId]",
+      "metadata": {
+        "description": "Id of subscription that all resources belong to. Only required if connecting to subnet or applying inbound network restrictions"
+      }
+    },
+    "tenantId": {
+      "type": "string",
+      "defaultValue": "[subscription().tenantId]",
+      "metadata": {
+        "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault. Get it by using Get-AzSubscription cmdlet."
+      }
+    },
+    "dockerRegistryName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "dockerRegistryResourceGroupName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "dockerImageName": {
+      "type": "string",
+      "defaultValue": "_MY_REGISTRY_USERNAME_.azurecr.io/_MY_NAMESPACE_/_MY_DOCKER_IMAGE_NAME_:_TAG_"
+    },
+    "dockerImageTag": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "stack": {
+      "type": "string",
+      "defaultValue": "dotnet",
+      "allowedValues": [
+        "dotnet",
+        "dotnetcore",
+        "node",
+        "java"
+      ]
+    },
+    "stackVersion": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "appKind": {
+      "type": "string",
+      "allowedValues": [
+        "app",
+        "linux",
+        "functionapp",
+        "app,linux",
+        "functionapp,linux",
+        "app,container",
+        "app,linux,container"
+      ]
+    },
+    "addDiagnosticSettings": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Add Diagnostic Settings to App Services"
+      }
+    },
+    "accessRestrictions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Inbound network access restrictions."
+      }
+    },
+    "applicationInsightsInstrumentationKey": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "App insights instrumentation key. Required because Azure portal fails if using a keyvault reference for AI"
+      }
+    },
+    "applicationInsightsName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the application insights resource."
+      }
+    },
+    "applicationInsightsSecretName": {
+      "type": "string",
+      "defaultValue": "AiInstrumentationKey",
+      "metadata": {
+        "description": "Specifies the name of the instrumentation key secret"
+      }
+    },
+    "certificatePermissions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Specifies the permissions to certificates in the vault"
+      }
+    },
+    "configCustom": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Custom application configuration settings to be used in addition to default settings"
+      }
+    },
+    "extensionVersion": {
+      "type": "string",
+      "defaultValue": "~3",
+      "allowedValues": [
+        "~3",
+        "~2",
+        "~1"
+      ],
+      "metadata": {
+        "description": "DotNet Core version that function app targets"
+      }
+    },
+    "keyPermissions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Specifies the permissions to keys in the vault"
+      }
+    },
+    "keyVaultName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Specifies the name of the key vault that stores connection strings and other app secrets"
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "name": "projectname-",
+    "webAppPortalName_var": "[parameters('appName')]",
+    "appServicePlanName_var": "[parameters('hostingPlanName')]",
+    "isWebApp": "[or(equals(parameters('appKind'), 'app'), equals(parameters('appKind'), 'app,linux'))]",
+    "isLinux": "[contains(parameters('appKind'), 'linux')]",
+    "isContainer": "[contains(parameters('appKind'), 'container')]",
+    "isFunctionApp": "[contains(parameters('appKind'), 'functionapp')]",
+    "fxVersion": "[format('{0}|{1}', parameters('stack'), parameters('stackVersion'))]",
+    "registryResourceId": "[resourceId(parameters('dockerRegistryResourceGroupName'), 'Microsoft.ContainerRegistry/registries', parameters('dockerRegistryName'))]",
+    "registryUrl": "[format('https://{0}.azurecr.io', parameters('dockerRegistryName'))]",
+    "fullImageName": "[format('{0}.azurecr.io/{1}:{2}', parameters('dockerRegistryName'), parameters('dockerImageName'), parameters('dockerImageTag'))]",
+    "containerFxVersion": "[format('DOCKER|{0}', variables('fullImageName'))]",
+    "emptyArray": [],
+    "networkVnetId": "[resourceId(parameters('subscriptionId'), parameters('networkResourceGroupName'), 'Microsoft.Network/virtualNetworks', parameters('networkVnetName'))]",
+    "networkSubnetId": "[format('{0}/subnets/{1}', variables('networkVnetId'), parameters('networkSubnetName'))]",
+    "functionAppAllowedOrigins": [
+      "https://functions.azure.com",
+      "https://functions-staging.azure.com",
+      "https://functions-next.azure.com"
+    ],
+    "omsWorkspaceID": "[resourceId(parameters('omsWorkspaceRG'), 'Microsoft.OperationalInsights/workspaces', parameters('omsWorkspaceName'))]",
+    "configDefault": {
+      "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('applicationInsightsInstrumentationKey')]",
+      "APPINSIGHTS_PROFILERFEATURE_VERSION": "1.0.0",
+      "AzureWebJobsStorage": "[parameters('storageConnectionString')]",
+      "ApplicationInsightsAgent_EXTENSION_VERSION": "~2",
+      "DiagnosticServices_EXTENSION_VERSION": "~3",
+      "InstrumentationEngine_EXTENSION_VERSION": "~1",
+      "XDT_MicrosoftApplicationInsights_BaseExtensions": "~1",
+      "XDT_MicrosoftApplicationInsights_Mode": "recommended",
+      "WEBSITE_RUN_FROM_PACKAGE": "[parameters('runFromPackage')]"
+    },
+    "configWebApp": {},
+    "configFunctionApp": {
+      "FUNCTIONS_WORKER_RUNTIME": "[parameters('runtimeStack')]",
+      "FUNCTIONS_EXTENSION_VERSION": "[parameters('extensionVersion')]",
+      "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[parameters('storageConnectionString')]",
+      "WEBSITE_CONTENTSHARE": "[toLower(parameters('appName'))]"
+    },
+    "configEmpty": {}
+  },
+  "resources": [
+    {
+      "condition": "[equals(parameters('addDiagnosticSettings'), true())]",
+      "type": "Microsoft.Web/sites/providers/diagnosticSettings",
+      "apiVersion": "2017-05-01-preview",
+      "name": "[format('{0}/Microsoft.Insights/{1}-diags', parameters('appName'), parameters('appName'))]",
+      "properties": {
+        "workspaceId": "[variables('omsWorkspaceID')]",
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": true
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "name": "[parameters('appName')]",
+      "location": "[parameters('location')]",
+      "kind": "[parameters('appKind')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "[if(variables('isLinux'), if(variables('isContainer'), variables('containerFxVersion'), variables('fxVersion')), null())]",
+          "netFrameworkVersion": "[if(equals(parameters('stack'), 'dotnet'), format('v{0}', parameters('stackVersion')), null())]",
+          "nodeVersion": "[if(equals(parameters('stack'), 'node'), parameters('stackVersion'), null())]",
+          "javaVersion": "[if(equals(parameters('stack'), 'java'), parameters('stackVersion'), null())]"
+        }
+      }
+    },
+    {
+      "condition": "[not(equals(parameters('networkSubnetName'), ''))]",
+      "type": "Microsoft.Web/sites/networkConfig",
+      "apiVersion": "2019-08-01",
+      "name": "[format('{0}/{1}', parameters('appName'), 'virtualNetwork')]",
+      "properties": {
+        "subnetResourceId": "[variables('networkSubnetId')]",
+        "isSwift": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2020-09-01",
+      "name": "[format('{0}/{1}', parameters('appName'), 'appsettings')]",
+      "properties": "[union(parameters('configCustom'), variables('configDefault'), if(variables('isWebApp'), variables('configWebApp'), if(variables('isFunctionApp'), variables('configFunctionApp'), if(variables('isContainer'), createObject('DOCKER_REGISTRY_SERVER_URL', variables('registryUrl'), 'DOCKER_REGISTRY_SERVER_USERNAME', listCredentials(variables('registryResourceId'), '2019-05-01').username, 'DOCKER_REGISTRY_SERVER_PASSWORD', listCredentials(variables('registryResourceId'), '2019-05-01').passwords[0].value), variables('configEmpty')))))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+      ]
+    },
+    {
+      "condition": "[not(equals(parameters('stagingSlotName'), ''))]",
+      "type": "Microsoft.Web/sites/slots",
+      "apiVersion": "2020-09-01",
+      "name": "[format('{0}/{1}', parameters('appName'), if(equals(parameters('stagingSlotName'), ''), 'staging', parameters('stagingSlotName')))]",
+      "location": "[parameters('location')]",
+      "kind": "[parameters('appKind')]",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "[if(variables('isLinux'), if(variables('isContainer'), variables('containerFxVersion'), variables('fxVersion')), null())]",
+          "netFrameworkVersion": "[if(equals(parameters('stack'), 'dotnet'), format('v{0}', parameters('stackVersion')), null())]",
+          "nodeVersion": "[if(equals(parameters('stack'), 'node'), parameters('stackVersion'), null())]",
+          "javaVersion": "[if(equals(parameters('stack'), 'java'), parameters('stackVersion'), null())]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2018-11-01",
+      "name": "[format('{0}/{1}', parameters('appName'), 'web')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "cors": {
+          "allowedOrigins": "[if(variables('isFunctionApp'), variables('functionAppAllowedOrigins'), variables('emptyArray'))]",
+          "supportCredentials": false
+        },
+        "ipSecurityRestrictions": "[parameters('accessRestrictions')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "apiVersion": "2019-09-01",
+      "name": "[format('{0}/add', parameters('keyVaultName'))]",
+      "properties": {
+        "accessPolicies": [
+          {
+            "tenantId": "[parameters('tenantId')]",
+            "objectId": "[reference(format('Microsoft.Web/sites/{0}', parameters('appName')), '2018-11-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": "[parameters('keyPermissions')]",
+              "secrets": "[parameters('secretPermissions')]",
+              "certificates": "[parameters('certificatePermissions')]"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+      ]
+    }
+  ]
+}

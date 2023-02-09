@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: __SELENIUM_NODE_APP_NAME__
+  labels:
+    app: __SELENIUM_NODE_APP_NAME__
+spec:
+  replicas: __SELENIUM_NODE_REPLICAS__
+  selector:
+    matchLabels:
+      app: __SELENIUM_NODE_APP_NAME__
+  template:
+    metadata:
+      name: __SELENIUM_NODE_APP_NAME__
+      labels:
+        app: __SELENIUM_NODE_APP_NAME__
+    spec:
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+      containers:
+        - name: __SELENIUM_NODE_APP_NAME__
+          image: __SELENIUM_NODE_FULL_IMAGE_NAME__ # selenium/node-chrome-debug:3.141
+          ports:
+            - containerPort: 5555
+          volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
+          env:
+            - name: HUB_HOST
+              value: "__SELENIUM_HUB_IP__"
+            - name: HUB_PORT
+              value: "4444"
+            - name: NODE_MAX_INSTANCES
+              value: "__NODE_MAX_INSTANCES__"
+            - name: NODE_MAX_SESSION
+              value: "__NODE_MAX_SESSION__"
+          resources:
+            requests:
+              cpu: "__SELENIUM_NODE_REQUESTS_CPU__"
+              memory: "__SELENIUM_NODE_REQUESTS_MEMORY__"
+            limits:
+              cpu: "__SELENIUM_NODE_LIMITS_CPU__"
+              memory: "__SELENIUM_NODE_LIMITS_MEMORY__"

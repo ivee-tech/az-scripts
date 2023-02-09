@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: __MONGODB_FULL_IMAGE_NAME__ #selenium/hub:3.141
+          ports:
+            - containerPort: 27017
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - mountPath: /data/db
+            name: voter-data-vol
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-lb-svc
+  labels:
+    app: mongodb-lb-svc
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - port: 4444
+      targetPort: 4444
+  type: LoadBalancer

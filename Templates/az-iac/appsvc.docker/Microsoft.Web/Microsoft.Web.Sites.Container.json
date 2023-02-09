@@ -1,0 +1,401 @@
+/*
+Website template, including Web Apps and Function Apps
+Includes creating a staging deployment slot for outageless deployments
+
+Reference:
+https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites?tabs=json
+https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites/virtualnetworkconnections?tabs=json
+https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults/accesspolicies?tabs=json
+
+Based on azure-quickstart-templates:
+https://github.com/Azure/azure-quickstart-templates/tree/master/101-functions-managed-identity
+https://github.com/Azure/azure-quickstart-templates/blob/master/101-keyvault-add-access-policy/azuredeploy.json
+
+*/
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "addDiagnosticSettings" : {
+        "type" : "bool",
+        "defaultValue": false,
+        "metadata" : {
+          "description" : "Add Diagnostic Settings to App Services"
+        }
+      },
+      /* Access restrictions secure incoming traffic. Wherever possible apply access restrictions to subnets, not IP ranges, eg
+        [
+          {
+            "vnetSubnetResourceId": "[concat(resourceId(subscription().subscriptionId, 'dmz-nonprod-1-net-rg', 'Microsoft.Network/virtualNetworks', 'dmz-nonprod-1-vnet1'), '/subnets/dmz-nonprod-DSGAPIM-ip')]",
+            "action": "Allow",
+            "tag": "Default",
+            "priority": 100,
+            "name": "Allow_Inbound"
+          }
+        ] 
+       */
+      "accessRestrictions": {
+        "type": "array",
+        "defaultValue": [],
+        "metadata": {
+          "description": "Inbound network access restrictions."
+        }
+      },
+      "appKind": {
+        "type": "string",
+        "metadata": {
+          "description": "The type of application, i.e. web app or function app"
+        },
+        "allowedValues": [
+          "app",
+          "functionapp",
+          "app,linux,container"
+        ]
+      },
+      "applicationInsightsInstrumentationKey": {
+        "type": "string",
+        "metadata": {
+          "description": "App insights instrumentation key. Required because Azure portal fails if using a keyvault reference for AI"
+        }
+      },
+      "applicationInsightsName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the application insights resource."
+        }
+      },
+      "applicationInsightsSecretName": {
+        "type": "string",
+        "defaultValue": "AiInstrumentationKey",
+        "metadata": {
+          "description": "Specifies the name of the instrumentation key secret"
+        }
+      },
+      "appName": {
+        "type": "String",
+        "metadata": {
+          "description": "The name of the web application or function application"
+        }
+      },
+      "certificatePermissions": {
+        "type": "array",
+        "defaultValue": [],
+        "metadata": {
+          "description": "Specifies the permissions to certificates in the vault"
+        }
+      },
+      "configCustom": {
+        "type": "object",
+        "metadata": {
+          "description": "Custom application configuration settings to be used in addition to default settings"
+        },
+        "defaultValue": {}
+      },
+      "extensionVersion": {
+        "type": "string",
+        "defaultValue": "~3",
+        "allowedValues": [
+          "~3",
+          "~2",
+          "~1"
+        ],
+        "metadata": {
+          "description": "DotNet Core version that function app targets"
+        }
+      },
+      "hostingPlanName": {
+        "type": "String",
+        "metadata": {
+          "description": "The name of the app service plan"
+        }
+      },
+      "keyPermissions": {
+        "type": "array",
+        "defaultValue": [],
+        "metadata": {
+          "description": "Specifies the permissions to keys in the vault"
+        }
+      },
+      "keyVaultName": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the name of the key vault that stores connection strings and other app secrets"
+        }
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Location for all resources."
+        }
+      },
+      "networkResourceGroupName": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Required if network components are in a different resource group"
+        }
+      },
+      "networkSubnetName": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "Optional, only required if assigning function app to subnet"
+        }
+      },
+      "networkVnetName": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "Optional, only required if assigning function app to subnet"
+        }
+      },
+      "omsWorkspaceRG" : {
+        "type" : "string",
+        "defaultValue" : "",
+        "metadata" : {
+          "description" : "Resource group name for Log Analytic Workspace"
+        }
+      },
+      "omsWorkspaceName" : {
+        "type" : "string",
+        "defaultValue" : "",
+        "metadata" : {
+          "description" : "The name for Log Analytic Workspace"
+        }
+      },
+      "runFromPackage": {
+        "type": "string",
+        "defaultValue": "1",
+        "metadata" : {
+          "description" : "Application run from package"
+        }
+      },
+      "runtimeStack": {
+        "type": "string",
+        "allowedValues": [
+          "powershell",
+          "dotnet",
+          "node",
+          "java"
+        ],
+        "metadata": {
+          "description": "Pick the language runtime that you want enabled"
+        }
+      },
+      "secretPermissions": {
+        "type": "array",
+        "defaultValue": [],
+        "metadata": {
+          "description": "Specifies the permissions to secrets in the vault"
+        }
+      },
+      "stagingSlotName": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "Name of the staging slot if used. Required for blue green / outageless deployments"
+        }
+      },
+      "storageConnectionString": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "Storage account connection string"
+        }
+      },
+      "subscriptionId": {
+        "type": "string",
+        "defaultValue": "[subscription().subscriptionId]",
+        "metadata": {
+          "description": "Id of subscription that all resources belong to. Only required if connecting to subnet or applying inbound network restrictions"
+        }
+      },
+      "tenantId": {
+        "type": "string",
+        "defaultValue": "[subscription().tenantId]",
+        "metadata": {
+          "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault. Get it by using Get-AzSubscription cmdlet."
+        }
+      },
+      "dockerImageName": {
+        "type": "string",
+        "defaultValue": "_MY_REGISTRY_USERNAME_.azurecr.io/_MY_NAMESPACE_/_MY_DOCKER_IMAGE_NAME_:_TAG_",
+        "metadata": {
+          "description": "The name of ACR container image"
+        }
+      },
+      "dockerRegistryUrl": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The url of ACR"
+        }
+      },
+      "dockerRegistryUsername": {
+        "type": "string",
+        "defaultValue": "_MY_REGISTRY_USERNAME_",
+        "metadata": {
+          "description": "The ACR username"
+        }
+      },
+      "dockerRegistryPassword": {
+        "type": "string",
+        "defaultValue": "_MY_REGISTRY_PSW_",
+        "metadata": {
+          "description": "ACR access key"
+        }
+      }
+    },
+    "variables": {
+      "emptyArray": [],
+      "networkVnetId": "[resourceId(parameters('subscriptionId'), parameters('networkResourceGroupName'), 'Microsoft.Network/virtualNetworks', parameters('networkVnetName'))]",
+      "networkSubnetId": "[concat(variables('networkVnetId'), '/subnets/', parameters('networkSubnetName'))]",
+      "functionAppAllowedOrigins": [
+        "https://functions.azure.com",
+        "https://functions-staging.azure.com",
+        "https://functions-next.azure.com"
+      ],
+      "omsWorkspaceID" : "[resourceId(parameters('omsWorkspaceRG'), 'Microsoft.OperationalInsights/workspaces', parameters('omsWorkspaceName'))]",
+  
+      /* configDefault items will be added to all sites. Web apps will also add configWebApp items, and function apps will also add configFunctionApp items */
+      "configDefault": {
+        "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('applicationInsightsInstrumentationKey')]",
+        "APPINSIGHTS_PROFILERFEATURE_VERSION": "1.0.0",
+        "AzureWebJobsStorage": "[parameters('storageConnectionString')]",
+        "ApplicationInsightsAgent_EXTENSION_VERSION": "~2",
+        "DiagnosticServices_EXTENSION_VERSION": "~3",
+        "InstrumentationEngine_EXTENSION_VERSION": "~1",
+        "XDT_MicrosoftApplicationInsights_BaseExtensions": "~1",
+        "XDT_MicrosoftApplicationInsights_Mode": "recommended",
+        "WEBSITE_RUN_FROM_PACKAGE": "[parameters('runFromPackage')]"
+      },
+      "configWebApp": {
+      },
+      "configFunctionApp": {
+        "FUNCTIONS_WORKER_RUNTIME": "[parameters('runtimeStack')]",
+        "FUNCTIONS_EXTENSION_VERSION":"[parameters('extensionVersion')]",
+        "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[parameters('storageConnectionString')]",
+        "WEBSITE_CONTENTSHARE": "[toLower(parameters('appName'))]"
+      },
+      "configSite": "[union(parameters('configCustom'), variables('configDefault'), if(equals(parameters('appKind'), 'app'), variables('configWebApp'), variables('configFunctionApp')))]"
+    },
+    "resources": [
+      {
+        "type" : "Microsoft.Web/sites/providers/diagnosticSettings",
+        "name" : "[concat(parameters('appName'),'/Microsoft.Insights/',parameters('appName'), '-diags')]",
+        "dependsOn" : [
+          "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+        ],
+        "apiVersion" : "2017-05-01-preview",
+        "properties" : {
+          "workspaceId" : "[variables('omsWorkspaceID')]",
+          "metrics" : [
+            {
+              "category" : "AllMetrics",
+              "enabled" : true
+            }
+          ]
+        },
+        "condition" : "[equals(parameters('addDiagnosticSettings'), true())]"
+      },
+
+      /* Add for container
+      - linuxFxVersion
+      - enabled
+      - appSettings
+      */
+
+      {
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2018-11-01",
+        "name": "[parameters('appName')]",
+        "location": "[parameters('location')]",
+        "kind": "[parameters('appKind')]",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "properties": {
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+          "linuxFxVersion": "[concat('DOCKER|', parameters('dockerImageName'))]",
+          "enabled": true
+        },
+        /* Temporary comment for container */
+        "resources": [
+          {
+            "condition": "[not(equals(parameters('networkSubnetName'), ''))]",
+            "type": "networkConfig",
+            "apiVersion": "2019-08-01",
+            "name": "virtualNetwork",
+            "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+            ],
+            "properties": {
+              "subnetResourceId": "[variables('networkSubnetId')]",
+              "isSwift": true
+            }
+          },
+          {
+            "name": "appsettings",
+            "type": "config",
+            "apiVersion": "2020-09-01",
+            "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+            ],
+            "properties": "[variables('configSite')]"
+          }
+        ]
+      },
+      {
+        "condition": "[not(equals(parameters('stagingSlotName'), ''))]",
+        "type": "Microsoft.Web/sites/slots",
+        "apiVersion": "2020-09-01",
+        "name": "[concat(parameters('appName'), '/', if(equals(parameters('stagingSlotName'), ''), 'staging', parameters('stagingSlotName')))]",
+        "location": "[parameters('location')]",
+        "kind": "[parameters('appKind')]",
+        "properties": {
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+        ]
+      },
+      {
+        "type": "Microsoft.Web/sites/config",
+        "apiVersion": "2018-11-01",
+        "name": "[concat(parameters('appName'), '/web')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+        ],
+        "properties": {
+          "cors": {          
+            "allowedOrigins": "[if(equals(parameters('appKind'), 'functionapp'), variables('functionAppAllowedOrigins'), variables('emptyArray'))]",
+            "supportCredentials": false
+          },
+          "ipSecurityRestrictions": "[parameters('accessRestrictions')]"
+        }
+      },
+      {
+        "type": "Microsoft.KeyVault/vaults/accessPolicies",
+        "name": "[concat(parameters('keyVaultName'), '/add')]",
+        "apiVersion": "2019-09-01",
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+        ],
+        "properties": {
+          "accessPolicies": [
+            {
+              "tenantId": "[parameters('tenantId')]",
+              "objectId": "[reference(concat('Microsoft.Web/sites/', parameters('appName')), '2018-11-01', 'Full').identity.principalId]",
+              "permissions": {
+                "keys": "[parameters('keyPermissions')]",
+                "secrets": "[parameters('secretPermissions')]",
+                "certificates": "[parameters('certificatePermissions')]"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

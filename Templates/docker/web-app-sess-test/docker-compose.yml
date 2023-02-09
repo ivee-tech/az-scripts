@@ -1,0 +1,4 @@
+version: '3.4'
+services:
+  web-app-sess-test:
+    image: web-app-sess-test:latest
