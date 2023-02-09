@@ -13,6 +13,8 @@ $destPat = '***'
 
 
 # $apiVersion = '' # '5.1' for Azure DevOps Services | '5.0' for Azure DevOps Server | '4.1' fro TFS 2018 
+$codeRootDir = "C:\s\DoH"
+$dataRootDir = "C:\Data\DoH"
 
 $srcCtx = Get-AzureDevOpsContext -protocol https -coreServer $srcSvr -org $srcOrg -project $srcProjName -apiVersion 5.1 `
     -pat $srcPat -isOnline
@@ -27,7 +29,7 @@ $destCtx = Get-AzureDevOpsContext -protocol https -coreServer $destSvr -org $des
 
 # get target project on the destination org
 $destProj = Get-Project -projectName $destProjName -context $destCtx
-$srcProjDir = "C:\Data\DoH\$($srcProjName)"
+$srcProjDir = "$dataRootDir\$($srcProjName)"
 New-Item -Path $srcProjDir -ItemType Directory -ErrorAction SilentlyContinue
 
 # remove all dest GIT repos
@@ -59,6 +61,35 @@ git remote add origin $repo.remoteUrl
 git -c http.extraHeader="Authorization: Basic $($destCtx.base64AuthInfo)" push origin --mirror
 
 }
+Set-Location $currentLocation
+
+
+# TFVC
+
+$srcWorkspace = 'daradu' # src collection
+$destWorkspace = 'ZipZappAus' # dest org
+$srcWorkspaceDir = "$codeRootDir\$($srcWorkspace)"
+$destWorkspaceDir = "$codeRootDir\$($destWorkspace)"
+$srcProjDir = "$srcWorkspaceDir\$($srcCtx.project)"
+$destProjDir = "$destWorkspaceDir\$($destCtx.project)"
+# dir /s tf.exe to find the location of tf tool (similar to the path below)
+$tfPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe"
+
+# one-off execution to create the source and destinatino workspaces
+# map the $srcWorkspaceDir and $destWorkspaceDir in the dialog
+tf workspace $srcWorkspace /new /collection:$($srcCtx.orgUrl)
+tf workspace $destWorkspace /new /collection:$($destCtx.orgUrl)
+New-Item -Path $srcWorkspaceDir -ItemType Directory -ErrorAction SilentlyContinue
+New-Item -Path $destWorkspaceDir -ItemType Directory -ErrorAction SilentlyContinue
+
+$currentLocation = Get-Location
+Set-Location $srcWorkspaceDir
+& $tfPath get
+Set-Location $destWorkspaceDir
+& $tfPath get
+Copy-Item -Path "$srcProjDir\*" -Destination $destProjDir -Recurse -Force
+& $tfPath add
+& $tfPath checkin /comment:"Added files from source $($srcCtx.projectUrl)" /recursive /noprompt
 Set-Location $currentLocation
 
 
