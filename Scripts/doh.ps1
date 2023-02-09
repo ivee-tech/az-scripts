@@ -18,14 +18,16 @@ $dataRootDir = "C:\Data\DoH"
 
 $srcCtx = Get-AzureDevOpsContext -protocol https -coreServer $srcSvr -org $srcOrg -project $srcProjName -apiVersion 5.1 `
     -pat $srcPat -isOnline
-
 $relSrcSvr = 'vsrm.dev.azure.com'
 $relSrcCtx = Get-AzureDevOpsContext -protocol https -coreServer $relSrcSvr -org $srcOrg -project $srcProjName -apiVersion 5.1 `
     -pat $srcPat -isOnline
 
 $destCtx = Get-AzureDevOpsContext -protocol https -coreServer $destSvr -org $destOrg -project $destProjName -apiVersion 6.0 `
     -pat $destPat -isOnline
-
+$relDestSvr = 'vsrm.dev.azure.com'
+$relDestCtx = Get-AzureDevOpsContext -protocol https -coreServer $relDestSvr -org $destOrg -project $destProjName -apiVersion 6.0 `
+        -pat $destPat -isOnline
+    
 
 # get target project on the destination org
 $destProj = Get-Project -projectName $destProjName -context $destCtx
@@ -70,8 +72,8 @@ $srcWorkspace = 'daradu' # src collection
 $destWorkspace = 'ZipZappAus' # dest org
 $srcWorkspaceDir = "$codeRootDir\$($srcWorkspace)"
 $destWorkspaceDir = "$codeRootDir\$($destWorkspace)"
-$srcProjDir = "$srcWorkspaceDir\$($srcCtx.project)"
-$destProjDir = "$destWorkspaceDir\$($destCtx.project)"
+$srcTfvcProjDir = "$srcWorkspaceDir\$($srcCtx.project)"
+$destTfvcProjDir = "$destWorkspaceDir\$($destCtx.project)"
 # dir /s tf.exe to find the location of tf tool (similar to the path below)
 $tfPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\tf.exe"
 
@@ -87,7 +89,7 @@ Set-Location $srcWorkspaceDir
 & $tfPath get
 Set-Location $destWorkspaceDir
 & $tfPath get
-Copy-Item -Path "$srcProjDir\*" -Destination $destProjDir -Recurse -Force
+Copy-Item -Path "$srcTfvcProjDir\*" -Destination $destTfvcProjDir -Recurse -Force
 & $tfPath add
 & $tfPath checkin /comment:"Added files from source $($srcCtx.projectUrl)" /recursive /noprompt
 Set-Location $currentLocation
@@ -165,7 +167,7 @@ $def.process.phases | ForEach-Object {
 # resolve service connections - temporarily disable
 $def.process.phases | ForEach-Object {
     $_.steps | ForEach-Object {
-        if($_.inputs.PSobject.Properties.name -match 'ConnectedServiceName') {
+        if($_.inputs.PSObject.Properties.name -match 'ConnectedServiceName') {
             $_.inputs.ConnectedServiceName = $null
         }
     }
@@ -229,6 +231,62 @@ $policies.value | ForEach-Object {
 }
 
 
+# Release defintions
+# remove all dest release definitions
+<#
+$destReleaseDefs = Get-ReleaseDefs -context $relDestCtx
+$destReleaseDefs.value | ForEach-Object {
+    Remove-ReleaseDef -releaseDefId $_.id -context $relDestCtx
+}
+#>
 
 # get release definitions
 $releaseDefs = Get-ReleaseDefs -context $relSrcCtx
+$releasesDir = "$($srcProjDir)\release"
+New-Item -Path $releasesDir -ItemType Directory -ErrorAction SilentlyContinue
+
+$srcVarGroups = Get-VarGroups -context $srcCtx
+$destVarGroups = Get-VarGroups -context $destCtx
+$queue = Get-QueueByName -queueName 'Azure Pipelines' -context $destCtx 
+
+# migrate release definitions
+$releaseDefs.value | ForEach-Object {
+    $releaseDef = Get-ReleaseDef -releaseDefId $_.id -context $relSrcCtx
+    $releaseDef | ConvertTo-Json -Depth 10 | Out-File "$releasesDir\$($releaseDef.name).json"
+    # resolve variable groups at release def level
+    $releaseDef.variableGroups | ForEach-Object {
+        $srcVarGroupId = $_.id
+        $srcVarGroup = $srcVarGroups.value | Where-Object { $_.id = $srcVarGroupId } | Select-Object -First 1
+        if($null -ne $srcVarGroup) {
+            $destVarGroup = $destVarGroups.value | Where-Object { $_.name -eq $srcVarGroup.name } | Select-Object -First 1
+            if($null -ne $destVarGroup) {
+                $destEnvVarGroups += $destVarGroup.id
+            }
+        }
+    }
+    $releaseDef.variableGroups = $destEnvVarGroups
+    # resolve variable groups at stage level
+    $releaseDef.environments | ForEach-Object {
+        $env = $_
+        $destEnvVarGroups = @()
+        $env.variableGroups | ForEach-Object {
+            $srcVarGroupId = $_.id
+            $srcVarGroup = $srcVarGroups.value | Where-Object { $_.id = $srcVarGroupId } | Select-Object -First 1
+            if($null -ne $srcVarGroup) {
+                $destVarGroup = $destVarGroups.value | Where-Object { $_.name -eq $srcVarGroup.name } | Select-Object -First 1
+                if($null -ne $destVarGroup) {
+                    $destEnvVarGroups += $destVarGroup.id
+                }
+            }
+        }
+        $env.variableGroups = $destEnvVarGroups
+        $env.deployPhases | ForEach-Object {
+            $deployPhase = $_
+            if($deployPhase.deploymentInput.PSObject.Properties.Name -match "queueId") {
+                $deployPhase.deploymentInput.queueId = $queue.id
+            }
+        }
+    }
+    $releaseDef.id = $null
+    Add-ReleaseDef -def $releaseDef -context $relDestCtx
+}

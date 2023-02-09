@@ -9,7 +9,7 @@ param(
     [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
 )
 
-$releaseDefUrl = $context.projectBaseUrl + '/release/definitions/' + $releaseDefId + '&api-version=' + $context.apiVersion
+$releaseDefUrl = $context.projectBaseUrl + '/release/definitions/' + $releaseDefId + '?api-version=' + $context.apiVersion
 Write-Host $releaseDefUrl
 
 if($context.isOnline) {
