@@ -3403,6 +3403,32 @@ $varGroup.variables.PSObject.Properties | ForEach-Object {
 }
 # . .\AzureDevOpsContext.ps1
 
+Function Get-WIT
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][string]$processId,
+    [Parameter(Mandatory=$true)][string]$witRefName,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+
+$witUrl = $context.orgBaseUrl + '/work/processes/' + $processId + '/workitemtypes/' + $witRefName + '?api-version=' + $context.apiVersion
+Write-Host $witUrl
+
+if($context.isOnline) {
+    $wit = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $witUrl -Method Get
+}
+else {
+    $wit = Invoke-RestMethod -Uri $witUrl -UseDefaultCredentials -Method Get
+}
+
+return $wit
+
+}
+# . .\AzureDevOpsContext.ps1
+
 Function Get-WorkItems
 {
     [CmdletBinding()]
@@ -4826,6 +4852,37 @@ else {
 }
 
 return $varGroup
+
+}
+# . .\AzureDevOpsContext.ps1
+
+Function Set-WIT
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][string]$processId,
+    [Parameter(Mandatory=$true)][string]$witRefName,
+    [Parameter(Mandatory=$true)][hashtable]$wit,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+
+$contentType = 'application/json-patch+json'
+
+$witUrl = $context.orgBaseUrl + '/work/processes/' + $processId + '/workitemtypes/' + $witRefName + '?api-version=' + $context.apiVersion
+Write-Host $witUrl
+
+$data = ConvertTo-Json -InputObject $wit -Depth 10
+
+if($context.isOnline) {
+    $newWit = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $witUrl -Method Patch -Body $data -ContentType $contentType
+}
+else {
+    $newWit = Invoke-RestMethod -Uri $witUrl -UseDefaultCredentials -Method Patch -Body $data -ContentType $contentType
+}
+
+return $newWit
 
 }
 Function Start-Build
