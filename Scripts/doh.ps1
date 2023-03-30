@@ -310,23 +310,27 @@ $apiVersion = '7.1'
 $ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
     -pat $pat -isOnline
 
-# add Iterations (not required)
+# add iterations based on iterations.json file which defines the entire structure for FY 23-24
 $response = Add-ClassificationNodes -structureGroup 'iterations' -jsonFilePath '.\iterations.json' -context $ctx
 $response
 
+# add root area path for the team
 $areaPath = 'DoH'
 $response = Add-ClassificationNode -structureGroup 'areas' -name $areaPath -path '' -context $ctx
 $response
 
+# create the team
 $teamName = 'DoH'
 $team = Add-Team -name $teamName -description $teamName -context $ctx
 $team
 
-$teamName = 'DoH' # 'a11674bc-cb8c-445f-b2ab-db01abfffb8f' # 'DoH'
+# configure default area path for the team
+$teamName = 'DoH'
 $areaPath = "$projName\$teamName"
 $team = Set-TeamAreaPath -teamName $teamName -areaPath $areaPath -context $ctx
 $team
 
+# configure backlog and default iteration for the team
 $teamName = 'DoH'
 $iterationPath = "$teamName"
 $iteration = Get-ClassificationNodeByPath -structureGroup 'iterations' -path $iterationPath -context $ctx
