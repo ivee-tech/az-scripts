@@ -1759,6 +1759,34 @@ $ct = $r.Headers[$ctHeader]
 return $result
 
 }
+# . .\AzureDevOpsContext.ps1
+
+Function Get-ClassificationNodeByPath
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet('areas', 'iterations')]
+    [Parameter(Mandatory=$true)][string]$structureGroup,
+    [Parameter()][string]$path,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# GET https://dev.azure.com/{organization}/{project}/_apis/wit/classificationnodes/{structureGroup}/{path}?api-version=7.1-preview.2
+$v = $context.apiVersion + '-preview.2'
+$classificationNodeUrl = $context.orgUrl + '/' + $context.project + '/_apis/wit/classificationnodes/' + $structureGroup + '/' + $path + '?api-version=' + $v
+Write-Host $classificationNodeUrl
+
+if($context.isOnline) {
+    $buildDef = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $classificationNodeUrl -Method Get
+}
+else {
+    $buildDef = Invoke-RestMethod -Uri $classificationNodeUrl -UseDefaultCredentials -Method Post
+}
+
+return $buildDef
+
+}
 Function Get-DescriptorFromGroupDescriptor()
 {
     Param(
@@ -3119,6 +3147,31 @@ else {
 }
 
 return $taskGroups
+
+}
+# . .\AzureDevOpsContext.ps1
+
+Function Get-TeamIterations
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][string]$teamName,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# GET https://dev.azure.com/{organization}/{project}/{team}/_apis/work/teamsettings/iterations?api-version=7.1-preview.1
+$v = $context.apiVersion + '-preview.1'
+$iterationsUrl = $context.orgUrl + '/' + $context.$project + '/' + $teamName + '/_apis/work/teamsettings/iterations?api-version=' + $v
+Write-Host $iterationsUrl
+if($context.isOnline) {
+    $project = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $iterationsUrl -Method Get -UseBasicParsing
+}
+else {
+    $project = Invoke-RestMethod -Uri $iterationsUrl -Method Get -UseDefaultCredentials -UseBasicParsing
+}
+
+return $project
 
 }
 # . .\AzureDevOpsContext.ps1
@@ -4730,6 +4783,82 @@ Function Set-TaskGroup
         $destTaskGroup = Add-TaskGroup -taskGroup $taskGroup -context $destCtx
     }
     return $destTaskGroup
+}
+# . .\AzureDevOpsContext.ps1
+
+Function Set-TeamAreaPath
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][string]$teamName,
+    [Parameter(Mandatory=$true)][string]$areaPath,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+$contentType = 'application/json-patch+json'
+$contentType = 'application/json'
+
+# PATCH https://dev.azure.com/{organization}/{project}/{team}/_apis/work/teamsettings/teamfieldvalues?api-version=7.1-preview.1
+$v = $context.apiVersion + '-preview.1'
+$teamsUrl = $context.orgUrl + '/' + $context.project + '/' + $teamName + '/_apis/work/teamsettings/teamfieldvalues?api-version=' + $v
+Write-Host $teamsUrl
+
+$data = @{
+    defaultValue = $areaPath;
+    values = @(
+        @{
+            value = $areaPath;
+            includeChildren = $true;
+        }
+    );
+} | ConvertTo-Json -Depth 10
+
+if($context.isOnline) {
+    $team = Invoke-WebRequest -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $teamsUrl -Method Patch -Body $data -ContentType $contentType
+}
+else {
+    $team = Invoke-WebRequest -Uri $teamsUrl -UseDefaultCredentials -Method Patch -Body $data -ContentType $contentType
+}
+
+return $team
+
+}
+# . .\AzureDevOpsContext.ps1
+
+Function Set-TeamSettings
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][string]$teamName,
+    [Parameter(Mandatory=$true)][string]$backlogIteration,
+    [Parameter(Mandatory=$true)][string]$defaultIteration,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+$contentType = 'application/json-patch+json'
+$contentType = 'application/json'
+
+# PATCH https://dev.azure.com/{organization}/{project}/{team}/_apis/work/teamsettings?api-version=7.1-preview.1
+$v = $context.apiVersion + '-preview.1'
+$teamsUrl = $context.orgUrl + '/' + $context.project + '/' + $teamName + '/_apis/work/teamsettings?api-version=' + $v
+Write-Host $teamsUrl
+
+$data = @{
+    backlogIteration = $backlogIteration;
+    defaultIteration = $defaultIteration;
+} | ConvertTo-Json -Depth 10
+
+if($context.isOnline) {
+    $team = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $teamsUrl -Method Patch -Body $data -ContentType $contentType
+}
+else {
+    $team = Invoke-RestMethod -Uri $teamsUrl -UseDefaultCredentials -Method Patch -Body $data -ContentType $contentType
+}
+
+return $team
+
 }
 # . .\AzureDevOpsContext.ps1
 # . .\Get-Group.ps1

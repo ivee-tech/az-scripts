@@ -290,3 +290,58 @@ $releaseDefs.value | ForEach-Object {
     $releaseDef.id = $null
     Add-ReleaseDef -def $releaseDef -context $relDestCtx
 }
+
+
+
+
+
+# add iterations
+
+# Remove-Module AzureDevOps
+# Import-Module .\AzureDevOps.psm1
+
+$svr = 'dev.azure.com';
+$org = 'daradu';
+$projName = 'dawr-demo';
+$pat = '***'
+$apiVersion = '7.1'
+
+# $apiVersion = '' # '5.1' for Azure DevOps Services | '5.0' for Azure DevOps Server | '4.1' fro TFS 2018 
+$ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
+    -pat $pat -isOnline
+
+# add Iterations (not required)
+$response = Add-ClassificationNodes -structureGroup 'iterations' -jsonFilePath '.\iterations.json' -context $ctx
+$response
+
+$areaPath = 'DoH'
+$response = Add-ClassificationNode -structureGroup 'areas' -name $areaPath -path '' -context $ctx
+$response
+
+$teamName = 'DoH'
+$team = Add-Team -name $teamName -description $teamName -context $ctx
+$team
+
+$teamName = 'DoH' # 'a11674bc-cb8c-445f-b2ab-db01abfffb8f' # 'DoH'
+$areaPath = "$projName\$teamName"
+$team = Set-TeamAreaPath -teamName $teamName -areaPath $areaPath -context $ctx
+$team
+
+$teamName = 'DoH'
+$iterationPath = "$teamName"
+$iteration = Get-ClassificationNodeByPath -structureGroup 'iterations' -path $iterationPath -context $ctx
+# use iteration identifier, not path
+$defaultIteration = $iteration.identifier
+$team = Set-TeamSettings -teamName $teamName -backlogIteration $defaultIteration -defaultIteration $defaultIteration -context $ctx
+$team
+
+
+Function HandleEx($ex) {
+    Write-Host $ex
+    $result = $ex.Response.GetResponseStream()
+    $reader = New-Object System.IO.StreamReader($result)
+    $responseBody = $reader.ReadToEnd()
+    Write-Host $responseBody
+}
+
+
