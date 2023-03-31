@@ -304,41 +304,59 @@ $svr = 'dev.azure.com';
 $org = 'daradu';
 $projName = 'dawr-demo';
 $pat = '***'
-$apiVersion = '7.1'
+$apiVersion = '7.0'
 
 # $apiVersion = '' # '5.1' for Azure DevOps Services | '5.0' for Azure DevOps Server | '4.1' fro TFS 2018 
 $ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
     -pat $pat -isOnline
 
 # add iterations based on iterations.json file which defines the entire structure for FY 23-24
-$response = Add-ClassificationNodes -structureGroup 'iterations' -jsonFilePath '.\iterations.json' -context $ctx
+$response = Add-ClassificationNodes -structureGroup 'iterations' -jsonFilePath '.\iterations.ac.json' -context $ctx
 $response
 
 # add root area path for the team
-$areaPath = 'DoH'
+$areaPath = 'Aged Care Team1' # 'DoH'
 $response = Add-ClassificationNode -structureGroup 'areas' -name $areaPath -path '' -context $ctx
 $response
 
 # create the team
-$teamName = 'DoH'
+$teamName = 'Aged Care Team1' # 'DoH'
 $team = Add-Team -name $teamName -description $teamName -context $ctx
 $team
 
 # configure default area path for the team
-$teamName = 'DoH'
+$teamName = 'Aged Care Team1' # 'DoH'
 $areaPath = "$projName\$teamName"
 $team = Set-TeamAreaPath -teamName $teamName -areaPath $areaPath -context $ctx
 $team
 
 # configure backlog and default iteration for the team
-$teamName = 'DoH'
-$iterationPath = "$teamName"
+$teamName = 'Aged Care Team1' # 'DoH'
+$iterationPath = "Aged Care Projects" # "$teamName"
 $iteration = Get-ClassificationNodeByPath -structureGroup 'iterations' -path $iterationPath -context $ctx
 # use iteration identifier, not path
 $defaultIteration = $iteration.identifier
 $team = Set-TeamSettings -teamName $teamName -backlogIteration $defaultIteration -defaultIteration $defaultIteration -context $ctx
 $team
 
+
+# get main iteration
+$iterationPath = "Aged Care Projects\Aged Care PIs" # 'DoH'
+$iteration = Get-ClassificationNodeByPath -structureGroup 'iterations' -path $iterationPath -context $ctx
+
+# get all iteration hierarchy as we don't have a way to extract only the desired iterations
+$iterations = Get-ClassificationNodes -structureGroup 'iterations' -ids $iteration.id -depth 5 -context $ctx
+# get the sprints (by convention, sprints are the "leaf" iterations)
+$sprints = Get-LeafClassificationNodes -classificationNode $iterations.value[0]
+
+# get the future sprints based on a date and add them to the team
+$d = (Get-Date) # .AddMonths(3)
+$futureSprints = $sprints | Where-Object { [DateTime]$_.attributes.startDate -ge $d }
+$teamName = 'Aged Care Team1' # 'DoH'
+$numberOfSprints = 3
+$futureSprints | Sort-Object -Property { [DateTime]$_.attributes.startDate } | Select-Object -First $numberOfSprints | ForEach-Object {
+    Set-TeamIteration -teamName $teamName -iterationIdentitifer $_.identifier -context $ctx
+}
 
 Function HandleEx($ex) {
     Write-Host $ex

@@ -1,0 +1,343 @@
+{
+    "id": 187,
+    "identifier": "756f5d23-ca8d-46fb-9c09-649fb42711a4",
+    "name": "dawr-demo",
+    "structureType": "iteration",
+    "hasChildren": true,
+    "children": [
+        {
+            "id": 189,
+            "identifier": "cfacd9ed-e9fa-45e6-b9ae-f4b11743b874",
+            "name": "Iteration 1",
+            "structureType": "iteration",
+            "hasChildren": true,
+            "children": [
+                {
+                    "id": 196,
+                    "identifier": "b40db85b-8743-40df-acda-1aada63b99ec",
+                    "name": "Sprint 1",
+                    "structureType": "iteration",
+                    "hasChildren": false,
+                    "attributes": {
+                        "startDate": "2021-08-01T00:00:00Z",
+                        "finishDate": "2021-08-15T00:00:00Z"
+                    },
+                    "path": "\\dawr-demo\\Iteration\\Iteration 1\\Sprint 1",
+                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/Iteration%201/Sprint%201"
+                },
+                {
+                    "id": 197,
+                    "identifier": "cec030f0-276c-42c3-b340-e7eddd61e430",
+                    "name": "Sprint 2",
+                    "structureType": "iteration",
+                    "hasChildren": false,
+                    "attributes": {
+                        "startDate": "2021-08-16T00:00:00Z",
+                        "finishDate": "2021-08-31T00:00:00Z"
+                    },
+                    "path": "\\dawr-demo\\Iteration\\Iteration 1\\Sprint 2",
+                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/Iteration%201/Sprint%202"
+                },
+                {
+                    "id": 198,
+                    "identifier": "d6de9c41-b2ed-4508-8939-62db07ee539a",
+                    "name": "Sprint 3",
+                    "structureType": "iteration",
+                    "hasChildren": false,
+                    "attributes": {
+                        "startDate": "2021-09-01T00:00:00Z",
+                        "finishDate": "2021-09-15T00:00:00Z"
+                    },
+                    "path": "\\dawr-demo\\Iteration\\Iteration 1\\Sprint 3",
+                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/Iteration%201/Sprint%203"
+                }
+            ],
+            "attributes": {
+                "startDate": "2021-08-01T00:00:00Z",
+                "finishDate": "2021-12-31T00:00:00Z"
+            },
+            "path": "\\dawr-demo\\Iteration\\Iteration 1",
+            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/Iteration%201"
+        },
+        {
+            "id": 190,
+            "identifier": "f01281e7-4664-4596-9579-c5c44aad8de8",
+            "name": "Iteration 2",
+            "structureType": "iteration",
+            "hasChildren": false,
+            "path": "\\dawr-demo\\Iteration\\Iteration 2",
+            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/Iteration%202"
+        },
+        {
+            "id": 191,
+            "identifier": "d3d5eb92-53c6-4ab6-9514-e34397c879fe",
+            "name": "Iteration 3",
+            "structureType": "iteration",
+            "hasChildren": false,
+            "path": "\\dawr-demo\\Iteration\\Iteration 3",
+            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/Iteration%203"
+        },
+        {
+            "id": 977,
+            "identifier": "5a1e6732-fe9c-4973-943d-f1bcd5547cb9",
+            "name": "Sample Kanban Iteration",
+            "structureType": "iteration",
+            "hasChildren": false,
+            "attributes": {
+                "startDate": "2021-01-01T00:00:00Z",
+                "finishDate": "2021-06-30T00:00:00Z"
+            },
+            "path": "\\dawr-demo\\Iteration\\Sample Kanban Iteration",
+            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/Sample%20Kanban%20Iteration"
+        },
+        {
+            "id": 1051,
+            "identifier": "de159eb0-dc30-45a3-b582-c1726d1647ba",
+            "name": "DoH",
+            "structureType": "iteration",
+            "hasChildren": true,
+            "children": [
+                {
+                    "id": 1052,
+                    "identifier": "22cf206e-be23-4c6d-ab69-19a35555f934",
+                    "name": "FY 23-24",
+                    "structureType": "iteration",
+                    "hasChildren": true,
+                    "children": [
+                        {
+                            "id": 1053,
+                            "identifier": "1da2c6a2-7833-4f9b-9c18-ce9b2212793b",
+                            "name": "Q1",
+                            "structureType": "iteration",
+                            "hasChildren": true,
+                            "children": [
+                                {
+                                    "id": 1054,
+                                    "identifier": "ab47190d-def3-4028-b5fc-4adf8a6513ae",
+                                    "name": "Mth 1",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2023-07-01T00:00:00Z",
+                                        "finishDate": "2023-07-31T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q1\\Mth 1",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q1/Mth%201"
+                                },
+                                {
+                                    "id": 1055,
+                                    "identifier": "b0e473dc-ff10-4e25-a1ca-12abfedd42ac",
+                                    "name": "Mth 2",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2023-08-01T00:00:00Z",
+                                        "finishDate": "2023-08-31T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q1\\Mth 2",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q1/Mth%202"
+                                },
+                                {
+                                    "id": 1056,
+                                    "identifier": "f78d6362-b78e-4624-8ef9-330eb3d94fc7",
+                                    "name": "Mth 3",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2023-09-01T00:00:00Z",
+                                        "finishDate": "2023-09-30T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q1\\Mth 3",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q1/Mth%203"
+                                }
+                            ],
+                            "attributes": {
+                                "startDate": "2023-07-01T00:00:00Z",
+                                "finishDate": "2023-09-30T00:00:00Z"
+                            },
+                            "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q1",
+                            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q1"
+                        },
+                        {
+                            "id": 1057,
+                            "identifier": "39b0bb49-02f8-49c3-814e-a1996a62d2a6",
+                            "name": "Q2",
+                            "structureType": "iteration",
+                            "hasChildren": true,
+                            "children": [
+                                {
+                                    "id": 1058,
+                                    "identifier": "80ecb356-3326-4b68-b3b5-02b0f8446798",
+                                    "name": "Mth 4",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2023-10-01T00:00:00Z",
+                                        "finishDate": "2023-10-31T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q2\\Mth 4",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q2/Mth%204"
+                                },
+                                {
+                                    "id": 1059,
+                                    "identifier": "b29f9281-2f5c-47a1-8e0c-38908c46ba8c",
+                                    "name": "Mth 5",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2023-11-01T00:00:00Z",
+                                        "finishDate": "2023-11-30T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q2\\Mth 5",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q2/Mth%205"
+                                },
+                                {
+                                    "id": 1060,
+                                    "identifier": "029119a9-0429-445a-9152-f7b1bd93e99f",
+                                    "name": "Mth 6",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2023-12-01T00:00:00Z",
+                                        "finishDate": "2023-12-31T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q2\\Mth 6",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q2/Mth%206"
+                                }
+                            ],
+                            "attributes": {
+                                "startDate": "2023-10-01T00:00:00Z",
+                                "finishDate": "2023-12-31T00:00:00Z"
+                            },
+                            "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q2",
+                            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q2"
+                        },
+                        {
+                            "id": 1061,
+                            "identifier": "dc66956c-db04-4655-9139-19ae9b4c9f7c",
+                            "name": "Q3",
+                            "structureType": "iteration",
+                            "hasChildren": true,
+                            "children": [
+                                {
+                                    "id": 1062,
+                                    "identifier": "85b18f64-7b4e-4bb0-b3f3-56310076c8f2",
+                                    "name": "Mth 7",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2024-01-01T00:00:00Z",
+                                        "finishDate": "2024-01-31T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q3\\Mth 7",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q3/Mth%207"
+                                },
+                                {
+                                    "id": 1063,
+                                    "identifier": "ff9cc4b1-5db2-4f71-a907-62543b94fd2d",
+                                    "name": "Mth 8",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2024-02-01T00:00:00Z",
+                                        "finishDate": "2024-02-28T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q3\\Mth 8",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q3/Mth%208"
+                                },
+                                {
+                                    "id": 1064,
+                                    "identifier": "a35fc26e-805f-41db-836b-a6e8b07e8054",
+                                    "name": "Mth 9",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2024-03-01T00:00:00Z",
+                                        "finishDate": "2024-03-31T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q3\\Mth 9",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q3/Mth%209"
+                                }
+                            ],
+                            "attributes": {
+                                "startDate": "2024-01-01T00:00:00Z",
+                                "finishDate": "2024-03-31T00:00:00Z"
+                            },
+                            "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q3",
+                            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q3"
+                        },
+                        {
+                            "id": 1065,
+                            "identifier": "b64d8031-5648-4961-8f48-5713ac83b725",
+                            "name": "Q4",
+                            "structureType": "iteration",
+                            "hasChildren": true,
+                            "children": [
+                                {
+                                    "id": 1066,
+                                    "identifier": "b5ef84f4-4e30-4333-afee-72e83089f394",
+                                    "name": "Mth 10",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2024-04-01T00:00:00Z",
+                                        "finishDate": "2024-04-30T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q4\\Mth 10",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q4/Mth%2010"
+                                },
+                                {
+                                    "id": 1067,
+                                    "identifier": "94f774c8-b045-4e1f-8d37-eecf90a195b1",
+                                    "name": "Mth 11",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2024-05-01T00:00:00Z",
+                                        "finishDate": "2024-05-31T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q4\\Mth 11",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q4/Mth%2011"
+                                },
+                                {
+                                    "id": 1068,
+                                    "identifier": "04dfcc28-9977-4732-87fc-331568685ec8",
+                                    "name": "Mth 12",
+                                    "structureType": "iteration",
+                                    "hasChildren": false,
+                                    "attributes": {
+                                        "startDate": "2024-06-01T00:00:00Z",
+                                        "finishDate": "2024-06-30T00:00:00Z"
+                                    },
+                                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q4\\Mth 12",
+                                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q4/Mth%2012"
+                                }
+                            ],
+                            "attributes": {
+                                "startDate": "2024-04-01T00:00:00Z",
+                                "finishDate": "2024-06-30T00:00:00Z"
+                            },
+                            "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24\\Q4",
+                            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24/Q4"
+                        }
+                    ],
+                    "attributes": {
+                        "startDate": "2023-07-01T00:00:00Z",
+                        "finishDate": "2024-06-30T00:00:00Z"
+                    },
+                    "path": "\\dawr-demo\\Iteration\\DoH\\FY 23-24",
+                    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH/FY%2023-24"
+                }
+            ],
+            "path": "\\dawr-demo\\Iteration\\DoH",
+            "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations/DoH"
+        }
+    ],
+    "path": "\\dawr-demo\\Iteration",
+    "_links": {
+        "self": {
+            "href": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations"
+        }
+    },
+    "url": "https://dev.azure.com/daradu/322a13fa-bb5d-492e-af4b-29a888bf3723/_apis/wit/classificationNodes/Iterations"
+}
