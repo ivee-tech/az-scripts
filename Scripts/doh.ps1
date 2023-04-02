@@ -358,6 +358,123 @@ $futureSprints | Sort-Object -Property { [DateTime]$_.attributes.startDate } | S
     Set-TeamIteration -teamName $teamName -iterationIdentitifer $_.identifier -context $ctx
 }
 
+
+# configure board columns
+$teamName = 'DoH'
+$boardName = 'Stories' # Features, Epics, depending on the Team configuration
+$columns = Get-BoardColumns -teamName $teamName -boardName $boardName -context $ctx
+$columns.value | ConvertTo-Json -Depth 10 | Out-File 'board-columns.doh.json'
+
+# update columns based on existing configuration; 
+# add a new in-progress column called QA, split in Doing / Done, with state ampping for User Story = QA and 7 items limit
+<#
+name = "QA"
+itemLimit =  7
+stateMappings = @{
+                    "User Story" = "QA"
+                }
+isSplit =  $true
+description = ""
+columnType = "inProgress"
+#>
+
+$qaColumnId = $null # null for new columns, use existing ID for update
+$newBoardColumns = @(
+    @{
+        id = "63789f9b-2ba8-4643-8e42-d863b4031b73"
+        name = "New"
+        itemLimit =  0
+        stateMappings = @{
+                              "User Story" = "New"
+                          }
+        columnType = "incoming"
+    },
+    @{
+        id = "c4652cc7-47f9-4e25-baff-f23309f92487"
+        name = "Active"
+        itemLimit =  5
+        stateMappings = @{
+                              "User Story" = "Active"
+                          }
+        isSplit =  $false
+        description = ""
+        columnType = "inProgress"
+    },
+    @{
+        id = "6b13a259-c367-48fe-a38a-0f268730380b"
+        name = "Dev"
+        itemLimit =  5
+        stateMappings = @{
+                              "User Story" = "Dev"
+                          }
+        isSplit =  $false
+        description = ""
+        columnType = "inProgress"
+    },
+    @{
+        id = "1d647c9e-45ed-408b-9ca6-2e9be9fd428e"
+        name = "Test"
+        itemLimit =  5
+        stateMappings = @{
+                              "User Story" = "Test"
+                          }
+        isSplit =  $false
+        description = ""
+        columnType = "inProgress"
+    },
+    @{
+        id = $qaColumnId
+        name = "QA"
+        itemLimit =  7
+        stateMappings = @{
+                              "User Story" = "QA"
+                          }
+        isSplit =  $true
+        description = ""
+        columnType = "inProgress"
+    },
+    @{
+        id = "bbc1cfa6-c479-4fea-9658-98684bfd5014"
+        name = "Resolved"
+        itemLimit =  5
+        stateMappings = @{
+                              "User Story" = "Resolved"
+                          }
+        isSplit =  $false
+        description = ""
+        columnType = "inProgress"
+    },
+    @{
+        id = "9c094c7e-2419-4ffa-aa20-c81df24c5470"
+        name = "Prod"
+        itemLimit = 5
+        stateMappings = @{
+                              "User Story" = "Prod"
+                          }
+        isSplit =  $false
+        description = ""
+        columnType = "inProgress"
+    },
+    @{
+        id = "78155db9-7a29-41d4-9201-75160264790f"
+        name = "Closed"
+        itemLimit = 0
+        stateMappings = @{
+                              "User Story" = "Closed"
+                          }
+        columnType = "outgoing"
+    }
+)
+$teamName = 'DoH'
+$boardName = 'Stories' # Features, Epics, depending on the Team configuration
+$response = Set-BoardColumns -teamName $teamName -boardName $boardName -columns $newBoardColumns -context $ctx
+
+$planId = 1590
+$suiteId = 1658
+$queryString = "select [System.Id], [System.WorkItemType], [System.Title], [Microsoft.VSTS.Common.Priority], [System.AssignedTo], [System.AreaPath] from WorkItems where [System.TeamProject] = @project and [System.WorkItemType] in group 'Microsoft.TestCaseCategory' and [System.AreaPath] under 'dawr-demo\\Team 1'"
+$suite = Set-TestPlanSuite -planId $planId -suiteId $suiteId -queryString $queryString -context $ctx
+$suite
+
 Function HandleEx($ex) {
     Write-Host $ex
     $result = $ex.Response.GetResponseStream()

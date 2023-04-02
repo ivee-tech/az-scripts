@@ -1106,6 +1106,61 @@ else {
 return $team
 
 }
+Function Add-TestPlanSuite {
+    param(
+      [ValidateNotNullOrEmpty()]
+      [Parameter(Mandatory = $true)][int]$planId,
+      [Parameter(Mandatory = $true)][int]$parentSuiteId,
+      [Parameter(Mandatory = $true)][string]$parentSuiteName,
+      [Parameter(Mandatory = $true)][string]$suiteName,
+      [Parameter(Mandatory = $true)][string]
+      [ValidateSet("staticTestSuite", "requirementTestSuite", "dynamicTestSuite")]
+      $suiteType,
+      [Parameter()][string]$requirementId,
+      [Parameter()][string]$queryString,
+      [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+      )
+  
+    $contentType = 'application/json'
+  
+    $v = $context.apiVersion + '-preview.1'
+    $destTestSuiteUrl = $context.projectBaseUrl + '/testplan/plans/' + $planId + '/suites/' + $parentSuiteId + '?api-version=' + $v
+    $destTestSuiteUrl
+  
+    $smartSingleQuotes = '[\u2019\u2018]'
+    $smartDoubleQuotes = '[\u201C\u201D]'
+  
+    $name = $suiteName -replace $smartSingleQuotes, "'" -replace $smartDoubleQuotes, '"'
+    $parentName = $parentSuiteName -replace $smartSingleQuotes, "'" -replace $smartDoubleQuotes, '"'
+  
+    $destSuiteData = @{
+      suiteType   = $suiteType;
+      name        = $name;
+      parentSuite = @{
+        id   = $parentSuiteId;
+        name = $parentName
+      }
+    }
+  
+    if ($PSBoundParameters.ContainsKey('requirementId') -and $null -ne $requirementId) {
+      $destSuiteData.requirementId = $requirementId
+    }
+  
+    if ($PSBoundParameters.ContainsKey('queryString')) {
+      $destSuiteData.queryString = $queryString
+    }
+  
+    $data = $destSuiteData | ConvertTo-Json -Depth 100
+    if ($context.isOnline) {
+      $destTestSuite = Invoke-RestMethod -Headers @{Authorization = "Basic $($context.base64AuthInfo)" } -Uri $destTestSuiteUrl -Method POST -Body $data -ContentType $contentType
+    }
+    else {
+      $destTestSuite = Invoke-RestMethod -Uri $destTestSuiteUrl -UseDefaultCredentials -Method POST -Body $data -ContentType $contentType
+    }
+  
+    return $destTestSuite
+  
+  }
 # . .\AzureDevOpsContext.ps1
 
 Function Add-UniversalPackage
@@ -1619,6 +1674,33 @@ Function Get-AzureDevOpsContext {
     return $r
   }
   
+# . .\AzureDevOpsContext.ps1
+
+Function Get-BoardColumns
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][string]$teamName, # name or ID
+    [Parameter(Mandatory=$true)][string]$boardName, # name or ID
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# GET https://dev.azure.com/{organization}/{project}/{team}/_apis/work/boards/{board}/columns?api-version=7.0
+$v = $context.apiVersion
+$boardUrl = $context.orgUrl + '/' + $context.project + '/' + $teamName + '/_apis/work/boards/' + $boardName + '/columns?api-version=' + $v
+Write-Host $boardUrl
+
+if($context.isOnline) {
+    $boardColumns = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $boardUrl
+}
+else {
+    $boardColumns = Invoke-RestMethod -Uri $boardUrl -UseDefaultCredentials
+}
+
+return $boardColumns
+
+}
 # . .\AzureDevOpsContext.ps1
 
 Function Get-Build
@@ -4354,6 +4436,64 @@ Function Restore-GitRepo {
 }
 # . .\AzureDevOpsContext.ps1
 
+class BoardColumn {
+    [ValidateSet('inProgress', 'incoming', 'outgoing')]
+    [string]$columnType
+    [string]$id	
+    [bool]$isSplit	
+    [int]$itemLimit	
+    [string]$name	
+    [hashtable]$stateMappings # keys are the WIT names, values are the states
+}
+
+# example
+<#
+{
+    "id": "12eed5fb-8af3-47bb-9d2a-058fbe7e1196",
+    "name": "New",
+    "itemLimit": 0,
+    "stateMappings": {
+      "Product Backlog Item": "New",
+      "Bug": "New"
+    }
+}
+#>
+
+
+Function Set-BoardColumns
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][string]$teamName, # name or ID
+    [Parameter(Mandatory=$true)][string]$boardName, # name or ID
+    # array of BoardColumn objects, see the definition: https://learn.microsoft.com/en-us/rest/api/azure/devops/work/columns/update?view=azure-devops-rest-7.0&tabs=HTTP#boardcolumn
+    # [Parameter(Mandatory=$true)][BoardColumn[]]$columns, 
+    [Parameter(Mandatory=$true)][hashtable[]]$columns, 
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+$contentType = 'application/json'
+
+# PUT https://dev.azure.com/{organization}/{project}/{team}/_apis/work/boards/{board}/columns?api-version=7.0
+$v = $context.apiVersion
+$boardUrl = $context.orgUrl + '/' + $context.project + '/' + $teamName + '/_apis/work/boards/' + $boardName + '/columns?api-version=' + $v
+Write-Host $boardUrl
+
+$data = $columns | ConvertTo-Json
+
+if($context.isOnline) {
+    $board = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $boardUrl -Method Put -Body $data -ContentType $contentType
+}
+else {
+    $board = Invoke-RestMethod -Uri $boardUrl -UseDefaultCredentials -Method Put -Body $data -ContentType $contentType
+}
+
+return $board
+
+}
+# . .\AzureDevOpsContext.ps1
+
 Function Set-BuildDef
 {
     [CmdletBinding()]
@@ -4939,6 +5079,60 @@ else {
 return $team
 
 }
+Function Set-TestPlanSuite {
+    param(
+      [ValidateNotNullOrEmpty()]
+      [Parameter(Mandatory = $true)][int]$planId,
+      [Parameter(Mandatory = $true)][int]$suiteId,
+      [Parameter()][string]$suiteName,
+      [Parameter()][string]$requirementId,
+      [Parameter()][string]$queryString,
+      [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+      )
+  
+    $contentType = 'application/json'
+  
+    $v = $context.apiVersion + '-preview.1'
+    $destTestSuiteUrl = $context.projectBaseUrl + '/testplan/plans/' + $planId + '/suites/' + $suiteId + '?api-version=' + $v
+    $destTestSuiteUrl
+  
+    $smartSingleQuotes = '[\u2019\u2018]'
+    $smartDoubleQuotes = '[\u201C\u201D]'
+  
+    $name = $suiteName -replace $smartSingleQuotes, "'" -replace $smartDoubleQuotes, '"'
+  
+    $destSuiteData = @{
+    }
+
+    if(![string]::IsNullOrEmpty($name)) {
+      $destSuiteData.name = $name
+    }
+    # {
+      # parentSuite = @{
+      #   id   = $parentSuiteId;
+      #   name = $parentName
+      # }
+    # }
+  
+    if ($PSBoundParameters.ContainsKey('requirementId') -and $null -ne $requirementId) {
+      $destSuiteData.requirementId = $requirementId
+    }
+  
+    if ($PSBoundParameters.ContainsKey('queryString')) {
+      $destSuiteData.queryString = $queryString
+    }
+  
+    $data = $destSuiteData | ConvertTo-Json -Depth 10
+    if ($context.isOnline) {
+      $destTestSuite = Invoke-RestMethod -Headers @{Authorization = "Basic $($context.base64AuthInfo)" } -Uri $destTestSuiteUrl -Method Patch -Body $data -ContentType $contentType
+    }
+    else {
+      $destTestSuite = Invoke-RestMethod -Uri $destTestSuiteUrl -UseDefaultCredentials -Method Patch -Body $data -ContentType $contentType
+    }
+  
+    return $destTestSuite
+  
+  }
 # . .\AzureDevOpsContext.ps1
 # . .\Get-Group.ps1
 # . .\Get-User.ps1
