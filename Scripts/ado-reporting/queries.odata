@@ -1,5 +1,7 @@
-## Model
+# Metadata Model
 https://analytics.dev.azure.com/{org}/_odata/v4.0-preview/$metadata
+
+# Burndown, Burnup, Velocity
 
 ## Burndown - Release
 https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
@@ -115,6 +117,512 @@ https://analytics.dev.azure.com/ivee/iv/_odata/v2.0/WorkItems?$apply=
     filter(WorkItemType in ('User Story', 'Bug'))/
 	filter(StateCategory in ('Resolved', 'Completed'))/
 	groupby(		(Iteration/IterationName), 			aggregate(StoryPoints with sum as TotalStoryPoints)		)
+
+
+# Work tracking
+
+## Filter work items based on a Changed Date
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/v1.0/WorkItems?
+  $select=WorkItemId, WorkItemType, Title, State 
+  &$expand=AssignedTo($select=UserEmail)
+  &$filter=(Project/ProjectName eq 'Fabrikam Fiber'
+    AND (WorkItemType eq 'Product Backlog Item' or WorkItemType eq 'Bug' or WorkItemType eq 'Feature')
+    AND ChangedOn/Date ge 2021-12-16T23:44:15.619Z)
+  &$orderby=WorkItemType desc
+
+## Filter work items based on Area
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}/WorkItems?
+  $filter=Area/AreaPath eq '{area path}'
+  &$select=WorkItemId, Title, State
+
+
+## Filter work items based on Iteration
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}/WorkItems?
+  $filter=Iteration/IterationPath eq '{iteration path}'
+  &$select=WorkItemId, Title, State
+
+
+## Retrieve items for an iteration
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}/WorkItems?
+  $filter=Iteration/IterationPath eq '{iteration path}' 
+    and ChangedDate ge Iteration/StartDate 
+    and ChangedDate le Iteration/EndDate
+  &$select=WorkItemId, Title, State
+
+## Filter work items containing specific tags
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}/WorkItems?
+  $filter=Tags/any(d:d/TagName eq '{tag name}')
+  &$select=WorkItemId, Title, State
+
+## Filter work items for a specific team
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}/WorkItems?
+  $filter=Teams/any(d:d/TeamName eq '{team name}')
+  &$select=WorkItemId, Title, State
+
+## Filter work items based on a field ever having a specific value
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}/WorkItems?
+  $filter=WorkItemType eq '{Type}'
+     and Revisions/any(r:r/ResolvedBy/UserName eq '{User}')
+	
+## Retrieve the teams assigned under an Area Path
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/v4.0-preview/Areas?
+      $filter=startswith(AreaPath,'Fabrikam Fiber\Account Management')
+      &$select=AreaPath&$expand=Teams($select=TeamName)
+
+## Return the history of a specific work item
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}/WorkItemRevisions?
+  $filter=WorkItemId eq {Id}
+  &$select=WorkItemId, Title, State, Iteration Path
+
+
+## Example: Parent to child query
+https://analytics.dev.azure.com/fabrikam/Fabrikam Fiber/_odata/v4.0-preview/WorkItems?$filter=WorkItemId eq 359&$select=WorkItemId, Title, WorkItemType, State&$expand=Children($select=WorkItemId,Title, WorkItemType, State)
+
+Example: Child to parent query
+https://analytics.dev.azure.com/fabrikam/Fabrikam%20Fiber/_odata/v4.0-preview/WorkItems?$select=WorkItemId,Title,State&$expand=Parent($select=WorkItemId,Title,WorkItemType, State)&$filter=WorkItemId eq 1048
+
+## Example: Request an item''s links
+https://analytics.dev.azure.com/fabrikam/Fabrikam Fiber/_odata/v4.0-preview/WorkItems?$select=WorkItemId,Title,WorkItemType,State&$filter=WorkItemId%20eq%20363&$expand=Links($select=SourceWorkItemId,TargetWorkItemId,LinkTypeName)
+
+## Example: Request details of linked items
+https://analytics.dev.azure.com/fabrikam/Fabrikam Fiber/_odata/v4.0-preview/WorkItems?$select=WorkItemId,Title,WorkItemType,State&$filter=WorkItemId%20eq%20103&$expand=Links($select=SourceWorkItemId,TargetWorkItemId,LinkTypeName;$expand=TargetWorkItem($select=WorkItemId,Title,State))
+
+## Example: Links of a specific type
+https://analytics.dev.azure.com/fabrikam/Fabrikam Fiber/_odata/v4.0-preview/WorkItems?$select=WorkItemId,Title,WorkItemType,State&$filter=WorkItemId eq 103&$expand=Links($select=SourceWorkItemId,TargetWorkItemId,LinkTypeName;$filter=LinkTypeName eq 'Related';$expand=TargetWorkItem($select=WorkItemId,Title,State))
+
+## Return the sum of all remaining work
+https://analytics.dev.azure.com/{OrganizationName}/_odata/{version}/WorkItems?
+  $apply=aggregate(RemainingWork with sum as SumOfRemainingWork)
+
+## Return the last work item identifier
+https://analytics.dev.azure.com/{OrganizationName}/_odata/{version}/WorkItems?
+  $apply=aggregate(WorkItemId with max as MaxWorkItemId)
+
+## Group results using the groupby clause
+https://analytics.dev.azure.com/{OrganizationName}/_odata/{version}/WorkItems?
+  $apply=groupby((WorkItemType), aggregate($count as Count))
+
+https://analytics.dev.azure.com/{OrganizationName}/_odata/{version}/WorkItems?
+  $apply=groupby((WorkItemType, State), aggregate($count as Count))
+
+## Filter aggregated results
+https://analytics.dev.azure.com/{OrganizationName}/_odata/{version}/WorkItems?
+  $apply=
+    filter(Iteration/IterationName eq 'Sprint 89')/
+    filter(WorkItemType eq 'User Story')/
+    groupby((State), aggregate($count as Count))
+
+## Generate multiple aggregations within a single call
+https://analytics.dev.azure.com/{OrganizationName}/_odata/{version}/WorkItems?
+	$apply=aggregate(CompletedWork with sum as SumOfCompletedWork, RemainingWork with sum as SumOfRemainingWork)
+
+
+## Generate calculated properties for use within a single call
+https://analytics.dev.azure.com/{OrganizationName}/_odata/{version}/WorkItems?
+	$apply=aggregate(CompletedWork with sum as SumOfCompletedWork, RemainingWork with sum as SumOfRemainingWork)/compute(SumOfCompletedWork div (SumOfCompletedWork add SumOfRemainingWork) as DonePercentage)
+
+## Generate a Cumulative Flow Diagram from aggregate data
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}//WorkItemBoardSnapshot?$apply=filter(DateValue gt 2015-07-16Z and DateValue le 2015-08-16Z)/filter(BoardName eq 'Stories' and Team/TeamName eq '{teamName}')/groupby((DateValue, ColumnName), aggregate(Count with sum as Count))&$orderby=DateValue
+
+
+## Query trend data
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}//WorkItemSnapshot?
+  $apply=
+    filter(DateValue ge 2016-03-01Z and DateValue le 2016-03-31Z and WorkItemType eq 'Bug')/
+    groupby((DateValue,State), aggregate($count as Count))
+  &$orderby=DateValue
+
+https://analytics.dev.azure.com/{OrganizationName}/{ProjectName}/_odata/{version}//WorkItemSnapshot?
+  $apply=
+    filter(WorkItemType eq 'Bug')/
+    filter(Iteration/IterationName eq 'Sprint 99')/
+    filter(DateValue ge Iteration/StartDate and (Iteration/EndDate eq null or DateValue le Iteration/EndDate))/
+    groupby((DateValue, State), aggregate($count as Count))
+  &$orderby=DateValue
+
+
+
+# Boards
+
+## Bug trend filtered by Area Path
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            WorkItemType eq 'Bug'
+            and State ne 'Closed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and DateValue ge {startdate} 
+            )
+        /groupby(
+            (DateValue,State,WorkItemType,Priority,Severity,Area/AreaPath,Iteration/IterationPath,AreaSK),
+            aggregate($count as Count)
+            )
+
+## Bug trend filtered by Teams
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            WorkItemType eq 'Bug'
+            and State ne 'Closed'
+            and (Teams/any(x:x/TeamName eq '{teamname}' or Teams/any(x:x/TeamName eq '{teamname}' or Teams/any(x:x/TeamName eq '{teamname}')
+            and DateValue ge {startdate} 
+            )
+        /groupby(
+            (DateValue,State,WorkItemType,Priority,Severity,Area/AreaPath,Iteration/IterationPath,AreaSK),
+            aggregate($count as Count)
+            )
+
+## Bug trend with a snapshot every Friday
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            WorkItemType eq 'Bug'
+            and State ne 'Closed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and DateValue ge {startdate}
+            and Date/DayName eq 'Friday' 
+        )
+        /groupby(
+            (DateValue,State,WorkItemType,Priority,Severity,Area/AreaPath,Iteration/IterationPath,AreaSK),
+            aggregate($count as Count)
+        )
+
+## Bug trend with a snapshot on the first of every month
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            WorkItemType eq 'Bug'
+            and State ne 'Closed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and DateValue ge {startdate}
+            and Date/DayOfMonth eq 1 
+        )
+        /groupby(
+            (DateValue,State,WorkItemType,Priority,Severity,Area/AreaPath,Iteration/IterationPath,AreaSK),
+            aggregate($count as Count)
+        )
+	
+## Rollup Story Points to Features of child User Stories based on Area Path
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+    $filter=WorkItemType eq 'Feature'
+        and State ne 'Cut'
+        and startswith(Area/AreaPath,'{areapath}')
+        and Descendants/any()
+    &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+    &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+        Descendants(
+        $apply=filter(WorkItemType eq 'User Story')
+        /aggregate($count as CountOfUserStories, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Rollup Story Points to Features of child User Stories based on Teams
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+    $filter=WorkItemType eq 'Feature'
+        and State ne 'Cut'
+        and (Teams/any(x:x/TeamName eq '{teamname}) or Teams/any(x:x/TeamName eq '{teamname}) or Teams/any(x:x/TeamName eq '{teamname}')
+        and Descendants/any()
+    &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+    &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+        Descendants(
+        $apply=filter(WorkItemType eq 'User Story')
+        /aggregate($count as CountOfUserStories, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Rollup Story Points to Epics
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+    $filter=WorkItemType eq 'Epic'
+        and State ne 'Cut'
+        and startswith(Area/AreaPath,'{areapath}')
+        and Descendants/any()
+    &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+    &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+        Descendants(
+        $apply=filter(WorkItemType eq 'User Story')
+        /aggregate(StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Rollup Tasks Remaining Work and Completed Work to User Stories
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+    $filter=WorkItemType eq 'User Story'
+        and State ne 'Removed'
+        and startswith(Area/AreaPath,'{areapath}')
+        and Descendants/any()
+    &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+    &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+        Descendants(
+        $apply=filter(WorkItemType eq 'Task')
+        /aggregate(RemainingWork with sum as TotalRemainingWork, CompletedWork with sum as TotalCompletedWork)
+        )
+	
+## Rollup Bug count to Features
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+    $filter=WorkItemType eq 'Feature'
+        and State ne 'Removed'
+        and startswith(Area/AreaPath,'{areapath}')
+        and Descendants/any()
+    &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+    &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+        Descendants(
+        $apply=filter(WorkItemType eq 'Bug')
+        /aggregate($count as CountOfBugs)
+        )
+
+## Review feature progress based on an area path
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'Feature'
+            and State ne 'Removed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and Descendants/any()
+        &$select=WorkItemId,Title,Area,Iteration,AssignedTo,WorkItemType,State,AreaSK
+        &$expand=Descendants(
+            $apply=filter(WorkItemType eq 'User Story')
+                /groupby((StateCategory),
+                aggregate(StoryPoints with sum as TotalStoryPoints))
+            )
+
+## Review feature progress for a team
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'Feature'
+            and State ne 'Cut'
+            and (Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}')
+            and Descendants/any()
+        &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+        &$expand=Descendants(
+            $apply=filter(WorkItemType eq 'User Story')
+                /groupby((StateCategory),
+                aggregate(StoryPoints with sum as TotalStoryPoints))
+            )
+
+## Return Features and their child User Stories
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'Feature'
+            and State ne 'Closed' and State ne 'Removed'
+            and startswith(Area/AreaPath,'{areapath}')
+        &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+                Links(
+                    $filter=LinkTypeName eq 'Child'
+                        and TargetWorkItem/WorkItemType eq 'User Story';
+                    $select=LinkTypeName;
+                    $expand=TargetWorkItem($select=WorkItemType,WorkItemId,Title,State)
+                )
+
+
+## Return User Stories linked with the Related link type
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'User Story'
+            and State ne 'Closed'
+            and startswith(Area/AreaPath,'{areapath}')
+        &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+                Links(
+                    $filter=LinkTypeName eq 'Related'
+                        and TargetWorkItem/WorkItemType eq 'User Story';
+                    $select=LinkTypeName;
+                    $expand=TargetWorkItem($select=WorkItemType,WorkItemId,Title,State)
+                )
+
+## Return linked User Stories filtered by Teams
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'User Story'
+            and State ne 'Closed'
+            and (Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}')
+        &$select=WorkItemId,Title,WorkItemType,State,Priority,Severity,TagNames,AreaSK
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+                Links(
+                    $filter=LinkTypeName eq 'Related'
+                        and TargetWorkItem/WorkItemType eq 'User Story';
+                    $select=LinkTypeName;
+                    $expand=TargetWorkItem($select=WorkItemType,WorkItemId,Title,State)
+                )
+
+## Return bugs with a Duplicate link to another bug
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'Bug'
+            and State ne 'Closed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and Links/any(x:x/LinkTypeName eq 'Duplicate' and x/TargetWorkItem/WorkItemType eq 'Bug')
+        &$select=WorkItemId,Title,WorkItemType,State,Priority,Severity,TagNames
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+            Links(
+                $filter=LinkTypeName eq 'Duplicate'
+                and TargetWorkItem/WorkItemType eq 'Bug';
+                    $select=LinkTypeName;
+                $expand=TargetWorkItem($select=WorkItemType,WorkItemId,Title,State)
+            )
+
+## Return bugs that don''t have a Duplicate link to another bug
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'Bug'
+                and State ne 'Closed'
+                and startswith(Area/AreaPath,'{areapath}')
+                and not (Links/any(x:x/LinkTypeName eq 'Duplicate' and x/TargetWorkItem/WorkItemType eq 'Bug'))
+        &$select=WorkItemId,Title,WorkItemType,State,Priority,Severity,TagNames
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath)
+
+## Burndown of User Stories in an area path from start and end date
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot?
+        $apply=filter(WorkItemType eq 'User Story'
+            and StateCategory ne 'Completed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and Tags/any(x:x/TagName eq '{tagname}')
+            and DateValue ge {startdate}
+            and DateValue le {enddate}
+        )
+        /groupby (
+            (DateValue,State,Area/AreaPath),
+            aggregate ($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Burndown of User Stories for a team
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot?
+        $apply=filter(WorkItemType eq 'User Story'
+            and StateCategory ne 'Completed'
+            and (Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}')
+            and Tags/any(x:x/TagName eq '{tagname}')
+            and DateValue ge {startdate}
+            and DateValue le {enddate}
+        )
+        /groupby (
+            (DateValue,State,Area/AreaPath),
+            aggregate ($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Burndown User Stories with a snapshot every Friday
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot?
+        $apply=filter(WorkItemType eq 'User Story'
+            and StateCategory ne 'Completed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and Tags/any(x:x/TagName eq '{tagname}')
+            and DateValue ge {startdate}
+            and DateValue le {enddate}
+            and Date/DayName eq 'Friday'
+        )
+        /groupby (
+            (DateValue,State,Area/AreaPath,AreaSK),
+            aggregate ($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Burndown User Stories based on an area and iteration path
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot?
+        $apply=filter(WorkItemType eq 'User Story'
+            and StateCategory ne 'Completed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and startswith(Iteration/IterationPath,'{iterationpath}')
+            and DateValue ge {startdate}
+            and DateValue le {enddate}
+            )
+        /groupby (
+            (DateValue,StateCategory,State,Area/AreaPath,AreaSK),
+            aggregate ($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Burndown User Stories with a custom field value
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot?
+        $apply=filter(WorkItemType eq 'User Story'
+            and StateCategory ne 'Completed'
+            and startswith(Area/AreaPath,'{areapath}')
+            and {customfieldname} eq '{releasevalue}'
+            and DateValue ge {startdate}
+            and DateValue le {enddate}
+            )
+        /groupby (
+            (DateValue,StateCategory,State,Area/AreaPath,AreaSK),
+            aggregate ($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+
+## Burndown User Stories for an area path and the current iteration
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            WorkItemType eq 'User Story'
+            and startswith(Area/AreaPath,'{areapath}')
+            and StateCategory ne 'Completed'
+            and DateValue ge Iteration/StartDate
+            and DateValue le Iteration/EndDate
+            and Iteration/StartDate le now() 
+            and Iteration/EndDate ge now()
+        )
+        /groupby(
+            (DateValue,State,WorkItemType,Priority,Area/AreaPath,Iteration/IterationPath),
+            aggregate($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Burndown User Stories for a team and the current iteration
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            WorkItemType eq 'User Story'
+            and (Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}')
+            and StateCategory ne 'Completed'
+            and DateValue ge Iteration/StartDate
+            and DateValue le Iteration/EndDate
+            and Iteration/StartDate le now() 
+            and Iteration/EndDate ge now()
+        )
+        /groupby(
+            (DateValue,State,WorkItemType,Priority,Area/AreaPath,Iteration/IterationPath),
+            aggregate($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Burndown User Stories for all sprints since the start of a year
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            WorkItemType eq 'User Story'
+            and startswith(Area/AreaPath,'{areapath}')
+            and StateCategory ne 'Completed'
+            and DateValue ge Iteration/StartDate
+            and DateValue le Iteration/EndDate
+            and Iteration/StartDate ge 2022-01-01Z
+        )
+        /groupby(
+            (DateValue,Iteration/EndDate,Area/AreaPath,Iteration/IterationPath,State,WorkItemType,Priority,AreaSK),
+            aggregate($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+## Burndown Tasks and Remaining Work
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            startswith(Area/AreaPath,'{project}')
+            and StateCategory ne 'Completed'
+            and DateValue ge Iteration/StartDate
+            and DateValue le Iteration/EndDate
+            and Iteration/StartDate le now() 
+            and Iteration/EndDate ge now()
+            and WorkItemType eq 'Task'
+        )
+            /groupby(
+            (DateValue,State,WorkItemType,Activity,Priority,Area/AreaPath,Iteration/IterationPath,AreaSK),
+            aggregate($count as Count, RemainingWork with sum as TotalRemainingWork)
+        )
+
+## Cumulative Flow Diagram (CFD)
+https://analytics.dev.azure.com/{organization}/{project}/_odata/V3.0-preview/WorkItemBoardSnapshot?
+        $apply=filter(
+            Team/TeamName eq '{teamname}'
+            and BoardName eq 'Stories' 
+            and DateValue ge {startdate}
+        )
+        /groupby(
+            (DateValue,ColumnName,LaneName,State,WorkItemType,AssignedTo/UserName,Area/AreaPath), 
+            aggregate($count as Count)
+        )
+
+## Return Lead Time and Cycle Time for User Stories and Area Path
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'User Story'
+            and StateCategory eq 'Completed'
+            and CompletedDate ge {startdate}
+            and startswith(Area/AreaPath,'{areapath}')
+        &$select=WorkItemId,Title,WorkItemType,State,Priority,AreaSK
+            ,CycleTimeDays,LeadTimeDays,CompletedDateSK
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath)
+
+## Return Lead Time and Cycle Time for User Stories and teams
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'User Story'
+            and StateCategory eq 'Completed'
+            and CompletedDate ge {startdate}
+            and (Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}') or Teams/any(x:x/TeamName eq '{teamname}')
+        &$select=WorkItemId,Title,WorkItemType,State,Priority,AreaSK
+            ,CycleTimeDays,LeadTimeDays,CompletedDateSK
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath)
+
 
 
 # Pipelines
@@ -423,3 +931,834 @@ $apply=filter(
     percentile_cont(TotalDurationSeconds, 0.95, PipelineId) as Duration95thPercentileInSeconds)
 /groupby(
 (Duration50thPercentileInSeconds, Duration80thPercentileInSeconds,Duration95thPercentileInSeconds, Pipeline/PipelineName))
+
+## Get 80th percentile duration trend for a specified pipeline
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.8,CompletedDateSK) as Duration80thPercentileInSeconds)
+/groupby(
+    (Duration80thPercentileInSeconds, CompletedOn/Date))
+&$orderby=CompletedOn/Date asc
+
+## Filter by pipeline ID, rather than Pipeline Name
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    PipelineId eq {pipelineId}
+    and CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.8,CompletedDateSK) as Duration80thPercentileInSeconds)
+/groupby(
+    (Duration80thPercentileInSeconds, CompletedOn/Date))
+&$orderby=CompletedOn/Date asc
+
+## Get 50th and 90th percentile, along with 80th percentile duration trend
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.5,CompletedDateSK) as Duration50thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.8,CompletedDateSK) as Duration80thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.90,CompletedDateSK) as Duration90thPercentileInSeconds)
+/groupby(
+    (Duration50thPercentileInSeconds, Duration80thPercentileInSeconds, Duration90thPercentileInSeconds, CompletedOn/Date))
+&$orderby=CompletedOn/Date asc
+
+## Filter by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.8,BranchSK, CompletedDateSK) as Duration80thPercentileInSeconds)
+/groupby(
+    (Duration80thPercentileInSeconds, Branch/BranchName, CompletedOn/Date))
+&$orderby=CompletedOn/Date asc
+
+## Duration trend for all project pipelines
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.8,PipelineId, CompletedDateSK) as Duration80thPercentileInSeconds)
+/groupby(
+    (Duration80thPercentileInSeconds, Pipeline/PipelineName, CompletedOn/Date))
+&$orderby=CompletedOn/Date asc
+
+## Task duration
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and PipelineRunCompletedOn/Date ge {startdate}
+    and (PipelineRunOutcome eq 'Succeed' or PipelineRunOutcome eq 'PartiallySucceeded')
+    and (CanceledCount ne 1 and SkippedCount ne 1 and AbandonedCount ne 1)
+    )
+/compute(
+    percentile_cont(ActivityDurationSeconds, 0.5, TaskDisplayName) as TaskDuration50thPercentileInSeconds,
+    percentile_cont(ActivityDurationSeconds, 0.8, TaskDisplayName) as TaskDuration80thPercentileInSeconds,
+    percentile_cont(ActivityDurationSeconds, 0.95, TaskDisplayName) as TaskDuration95thPercentileInSeconds)
+/groupby(
+    (TaskDuration50thPercentileInSeconds, TaskDuration80thPercentileInSeconds,TaskDuration95thPercentileInSeconds, TaskDisplayName))
+&$orderby=TaskDuration50thPercentileInSeconds desc
+
+## Task duration trend for specified pipeline name
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and TaskDisplayName eq '{taskname}'
+    and PipelineRunCompletedOn/Date ge {startdate}
+    and (PipelineRunOutcome eq 'Succeed' or PipelineRunOutcome eq 'PartiallySucceeded')
+    and (CanceledCount ne 1 and SkippedCount ne 1 and AbandonedCount ne 1)
+    )
+/compute(
+    percentile_cont(ActivityDurationSeconds, 0.8, PipelineRunCompletedDateSK) as TaskDuration80thPercentileInSeconds)
+/groupby(
+    (TaskDuration80thPercentileInSeconds, PipelineRunCompletedOn/Date))
+&$orderby=PipelineRunCompletedOn/Date asc
+
+## Task duration trend for a pipeline, specify pipeline ID
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineId eq {pipelineid}
+    and TaskDisplayName eq '{taskname}'
+    and PipelineRunCompletedOn/Date ge {startdate}
+    and (PipelineRunOutcome eq 'Succeed' or PipelineRunOutcome eq 'PartiallySucceeded')
+    and (CanceledCount ne 1 and SkippedCount ne 1 and AbandonedCount ne 1)
+    )
+/compute(
+    percentile_cont(ActivityDurationSeconds, 0.8, PipelineRunCompletedDateSK) as TaskDuration80thPercentileInSeconds)
+/groupby(
+    (TaskDuration80thPercentileInSeconds, PipelineRunCompletedOn/Date))
+&$orderby=PipelineRunCompletedOn/Date asc
+
+## 50th, 80th, and 90th percentile task duration trend for a pipeline
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+Pipeline/PipelineName eq '{pipelinename}'
+and TaskDisplayName eq '{taskname}'
+and PipelineRunCompletedOn/Date ge {startdate}
+and (PipelineRunOutcome eq 'Succeed' or PipelineRunOutcome eq 'PartiallySucceeded')
+and (CanceledCount ne 1 and SkippedCount ne 1 and AbandonedCount ne 1)
+)
+/compute(
+percentile_cont(ActivityDurationSeconds, 0.5, PipelineRunCompletedDateSK) as TaskDuration50thPercentileInSeconds,
+percentile_cont(ActivityDurationSeconds, 0.8, PipelineRunCompletedDateSK) as TaskDuration80thPercentileInSeconds,
+percentile_cont(ActivityDurationSeconds, 0.95, PipelineRunCompletedDateSK) as TaskDuration95thPercentileInSeconds)
+/groupby(
+(TaskDuration50thPercentileInSeconds, TaskDuration80thPercentileInSeconds, TaskDuration95thPercentileInSeconds, PipelineRunCompletedOn/Date))
+&$orderby=PipelineRunCompletedOn/Date asc
+
+## Task duration trend for a pipeline filtered by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and TaskDisplayName eq '{taskname}'
+    and PipelineRunCompletedOn/Date ge {startdate}
+    and (PipelineRunOutcome eq 'Succeed' or PipelineRunOutcome eq 'PartiallySucceeded')
+    and (CanceledCount ne 1 and SkippedCount ne 1 and AbandonedCount ne 1)
+    )
+/compute(
+    percentile_cont(ActivityDurationSeconds, 0.8, BranchSK, PipelineRunCompletedDateSK) as TaskDuration80thPercentileInSeconds)
+/groupby(
+    (TaskDuration80thPercentileInSeconds, Branch/BranchName, PipelineRunCompletedOn/Date))
+&$orderby=PipelineRunCompletedOn/Date asc
+
+## Task duration trend for all pipeline tasks
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and PipelineRunCompletedOn/Date ge {startdate}
+    and (PipelineRunOutcome eq 'Succeed' or PipelineRunOutcome eq 'PartiallySucceeded')
+    and (CanceledCount ne 1 and SkippedCount ne 1 and AbandonedCount ne 1)
+    )
+/compute(
+    percentile_cont(ActivityDurationSeconds, 0.8, TaskDisplayName, PipelineRunCompletedDateSK) as TaskDuration80thPercentileInSeconds)
+/groupby(
+    (TaskDuration80thPercentileInSeconds, TaskDisplayName, PipelineRunCompletedOn/Date))
+&$orderby=PipelineRunCompletedOn/Date asc
+
+
+# Pipeline Tests
+
+## Test summary for Build workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And DateSK ge {startdate}
+	And Workflow eq 'Build'
+	)
+	/aggregate(
+		ResultCount with sum as ResultCount,
+		ResultPassCount with sum as ResultPassCount,
+		ResultFailCount with sum as ResultFailCount,
+		ResultNotExecutedCount with sum as ResultNotExecutedCount,
+		ResultNotImpactedCount with sum as ResultNotImpactedCount
+	)
+
+## Test summary for Release workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And DateSK ge {startdate}
+	And Workflow eq 'Release'
+	)
+	/aggregate(
+		ResultCount with sum as ResultCount,
+		ResultPassCount with sum as ResultPassCount,
+		ResultFailCount with sum as ResultFailCount,
+		ResultNotExecutedCount with sum as ResultNotExecutedCount,
+		ResultNotImpactedCount with sum as ResultNotImpactedCount
+	)
+
+## Test summary filtered by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And DateSK ge {startdate}
+	And Workflow eq 'Build'
+	)
+	/groupby(
+		(Branch/BranchName),
+		/aggregate(
+		ResultCount with sum as ResultCount,
+		ResultPassCount with sum as ResultPassCount,
+		ResultFailCount with sum as ResultFailCount,
+		ResultNotExecutedCount with sum as ResultNotExecutedCount,
+		ResultNotImpactedCount with sum as ResultNotImpactedCount
+	))
+
+
+## Test summary filtered by test file
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And DateSK ge {startdate}
+	And Workflow eq 'Build')
+	/groupby(
+		(Test/ContainerName),
+		/aggregate(
+		ResultCount with sum as ResultCount,
+		ResultPassCount with sum as ResultPassCount,
+		ResultFailCount with sum as ResultFailCount,
+		ResultNotExecutedCount with sum as ResultNotExecutedCount,
+		ResultNotImpactedCount with sum as ResultNotImpactedCount
+	))
+
+## Test summary filtered by test owner
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And DateSK ge {startdate}
+	And Workflow eq 'Build')
+	/groupby(
+		(Test/TestOwner), 
+		/aggregate(
+		ResultCount with sum as ResultCount,
+		ResultPassCount with sum as ResultPassCount,
+		ResultFailCount with sum as ResultFailCount,
+		ResultNotExecutedCount with sum as ResultNotExecutedCount,
+		ResultNotImpactedCount with sum as ResultNotImpactedCount
+))
+
+## Test summary trend for Build workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestRuns?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	and CompletedOn/Date ge {startdate}
+	and Workflow eq 'Build'
+	)
+/groupby(
+	(CompletedOn/Date), 
+	aggregate(
+	ResultCount with sum as ResultCount,
+	ResultPassCount with sum as ResultPassCount,
+	ResultNotExecutedCount with sum as ResultNotExecutedCount,
+	ResultNotImpactedCount with sum as ResultNotImpactedCount,
+	ResultFailCount with sum as ResultFailCount
+	))
+/compute(
+iif(ResultCount gt ResultNotExecutedCount, ((ResultPassCount add ResultNotImpactedCount) div cast(ResultCount sub ResultNotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+
+## Test summary trend for Release workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestRuns?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	and CompletedOn/Date ge {startdate})
+/groupby((Workflow, CompletedOn/Date), 
+	aggregate(
+	ResultPassCount with sum as ResultPassCount,
+	ResultNotExecutedCount with sum as ResultNotExecutedCount,
+	ResultCount with sum as ResultCount,
+	ResultNotImpactedCount with sum as ResultNotImpactedCount,
+	ResultFailCount with sum as ResultFailCount))
+/compute(
+iif(ResultCount gt ResultNotExecutedCount, ((ResultPassCount add ResultNotImpactedCount) div cast(ResultCount sub ResultNotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+## Test summary trend filtered by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestRuns?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	and CompletedOn/Date ge {startdate}
+	and Workflow eq 'Build')
+/groupby((Branch/BranchName, CompletedOn/Date), 
+	aggregate(
+	ResultPassCount with sum as ResultPassCount,
+	ResultNotExecutedCount with sum as ResultNotExecutedCount,
+	ResultCount with sum as ResultCount,
+	ResultNotImpactedCount with sum as ResultNotImpactedCount,
+	ResultFailCount with sum as ResultFailCount))
+/compute(
+iif(ResultCount gt ResultNotExecutedCount, ((ResultPassCount add ResultNotImpactedCount) div cast(ResultCount sub ResultNotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+
+## Test summary trend filtered by test file
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	and CompletedOn/Date ge {startdate}
+	And Workflow eq 'Build')
+/groupby((Test/ContainerName, Date/Date), 
+	aggregate(
+	ResultPassCount with sum as ResultPassCount,
+	ResultNotExecutedCount with sum as ResultNotExecutedCount,
+	ResultCount with sum as ResultCount,
+	ResultNotImpactedCount with sum as ResultNotImpactedCount,
+	ResultFailCount with sum as ResultFailCount))
+/compute(
+iif(ResultCount gt ResultNotExecutedCount, ((ResultPassCount add ResultNotImpactedCount) div cast(ResultCount sub ResultNotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+## Test summary trend filtered by test owner
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	and CompletedOn/Date ge {startdate}
+	And Workflow eq 'Build')
+/groupby((Test/TestOwner, Date/Date), 
+	aggregate(
+	ResultPassCount with sum as ResultPassCount,
+	ResultNotExecutedCount with sum as ResultNotExecutedCount,
+	ResultCount with sum as ResultCount,
+	ResultNotImpactedCount with sum as ResultNotImpactedCount,
+	ResultFailCount with sum as ResultFailCount))
+/compute(
+iif(ResultCount gt ResultNotExecutedCount, ((ResultPassCount add ResultNotImpactedCount) div cast(ResultCount sub ResultNotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+## Failed tests for a Build workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build'
+	)
+/groupby(
+	(TestSK, Test/TestName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FailedCount gt 0)
+/compute(
+iif(TotalCount gt NotExecutedCount, ((PassedCount add NotImpactedCount) div cast(TotalCount sub NotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+
+## Failed tests for Release workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate})
+/groupby((TestSK, Test/TestName, Workflow), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FailedCount gt 0)
+/compute(
+iif(TotalCount gt NotExecutedCount, ((PassedCount add NotImpactedCount) div cast(TotalCount sub NotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+## Failed tests filtered by Branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build')
+/groupby((TestSK, Test/TestName, Branch/BranchName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FailedCount gt 0)
+/compute(
+iif(TotalCount gt NotExecutedCount, ((PassedCount add NotImpactedCount) div cast(TotalCount sub NotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+## Failed tests filtered by test file
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate})
+/groupby((TestSK, Test/TestName, Test/ContainerName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FailedCount gt 0)
+/compute(
+iif(TotalCount gt NotExecutedCount, ((PassedCount add NotImpactedCount) div cast(TotalCount sub NotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+
+## Failed tests filtered by test owner
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate})
+/groupby((TestSK, Test/TestName, Test/TestOwner), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FailedCount gt 0)
+/compute(
+iif(TotalCount gt NotExecutedCount, ((PassedCount add NotImpactedCount) div cast(TotalCount sub NotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+
+## Flaky tests for a Build workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build'
+	)
+/groupby(
+	(TestSK, Test/TestName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FlakyCount gt 0)
+/compute(
+	(FlakyCount div cast(TotalCount, Edm.Decimal)) mul 100 as FlakyRate
+)
+
+
+## Flaky tests for Release workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate})
+/groupby((TestSK, Test/TestName, Workflow), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FlakyCount gt 0)
+/compute(
+(FlakyCount div cast(TotalCount, Edm.Decimal)) mul 100 as FlakyRate)
+
+## Flaky tests filtered by Branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build')
+/groupby((TestSK, Test/TestName, Branch/BranchName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FlakyCount gt 0)
+/compute(
+(FlakyCount div cast(TotalCount, Edm.Decimal)) mul 100 as FlakyRate)
+
+## Flaky tests filtered by test file
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate})
+/groupby((TestSK, Test/TestName, Test/ContainerName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FlakyCount gt 0)
+/compute(
+(FlakyCount div cast(TotalCount, Edm.Decimal)) mul 100 as FlakyRate)
+
+## Flaky tests filtered by test owner
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate})
+/groupby((TestSK, Test/TestName, Test/TestOwner), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as PassedCount,
+	ResultFailCount with sum as FailedCount,
+	ResultNotExecutedCount with sum as NotExecutedCount,
+	ResultNotImpactedCount with sum as NotImpactedCount,
+	ResultFlakyCount with sum as FlakyCount))
+/filter(FlakyCount gt 0)
+/compute(
+(FlakyCount div cast(TotalCount, Edm.Decimal)) mul 100 as FlakyRate)
+
+
+## Test duration for Build workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build'
+	)
+/groupby(
+	(TestSK, Test/TestName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultDurationSeconds with sum as TotalDuration
+	))
+/compute(
+TotalDuration div TotalCount as AvgDuration)
+
+## Test duration for Release workflow
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate})
+/groupby((TestSK, Test/TestName, Workflow), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultDurationSeconds with sum as TotalDuration
+	))
+/compute(
+TotalDuration div TotalCount as AvgDuration)
+
+## Test duration filtered by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build')
+/groupby((TestSK, Test/TestName, Branch/BranchName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultDurationSeconds with sum as TotalDuration
+	))
+/compute(
+TotalDuration div TotalCount as AvgDuration)
+
+## Test duration filtered by test file
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build')
+/groupby((TestSK, Test/TestName, Test/ContainerName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultDurationSeconds with sum as TotalDuration
+	))
+/compute(
+TotalDuration div TotalCount as AvgDuration)
+
+## Test duration filtered by test owner
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build')
+/groupby((TestSK, Test/TestName, Test/TestOwner), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultDurationSeconds with sum as TotalDuration
+	))
+/compute(
+TotalDuration div TotalCount as AvgDuration)
+
+
+## Test duration trend
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Workflow eq 'Build'
+	)
+/groupby(
+	(TestSK, Test/TestName), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultDurationSeconds with sum as TotalDuration
+	))
+/compute(
+TotalDuration div TotalCount as AvgDuration)
+
+## Pass rate trend of test
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v4.0-preview/TestResultsDaily?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	And Date/Date ge {startdate}
+	And Test/TestName eq '{testName}'
+	And Workflow eq 'Build')
+/groupby((Date/Date), 
+	aggregate(
+	ResultCount with sum as TotalCount,
+	ResultPassCount with sum as ResultPassCount,
+	ResultFailCount with sum as ResultFailCount,
+	ResultAbortedCount with sum as ResultAbortedCount,
+	ResultErrorCount with sum as ResultErrorCount,
+	ResultInconclusiveCount with sum as ResultInconclusiveCount,
+	ResultNotExecutedCount with sum as ResultNotExecutedCount,
+	ResultNotImpactedCount with sum as ResultNotImpactedCount))
+/filter(ResultFailCount gt 0)
+/compute(
+	iif(TotalCount gt ResultNotExecutedCount, ((ResultPassCount add ResultNotImpactedCount) div cast(TotalCount sub ResultNotExecutedCount, Edm.Decimal)) mul 100, 0) as PassRate)
+
+
+# Test Plans
+
+## Progress status
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/TestPoints? 
+$apply=filter(TestSuite/TestPlanTitle eq '{testPlanTitle}')
+/aggregate( 
+    $count as TotalCount,  
+    cast(LastResultOutcome eq 'Passed', Edm.Int32) with sum as Passed,  
+    cast(LastResultOutcome eq 'Failed', Edm.Int32) with sum as Failed, 
+    cast(LastResultOutcome eq 'Blocked', Edm.Int32) with sum as Blocked, 
+    cast(LastResultOutcome eq 'NotApplicable', Edm.Int32) with sum as NotApplicable, 
+    cast(LastResultOutcome eq 'None', Edm.Int32) with sum as NotExecuted, 
+    cast(LastResultOutcome ne 'None', Edm.Int32) with sum as Executed 
+)
+/compute( 
+    Executed mul 100 div TotalCount as ExecPct, 
+    iif(TotalCount gt NotExecuted, Passed mul 100 div Executed,0) as PassedPct 
+)
+
+## Query for percentage of hours completion for requirements
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems? 
+$filter=(
+    IterationSK eq {iterationSK}
+    and AreaSK eq {areaSK}
+    and Processes/any(p:p/BacklogType eq 'RequirementBacklog') 
+    and Processes/all(p:p/IsBugType eq false)
+)
+&$expand=Descendants(
+    $apply=filter(
+        CompletedWork ne null 
+        or RemainingWork ne null
+    )
+    /aggregate(
+        iif(CompletedWork ne null, CompletedWork, 0) with sum as SumCompletedWork, 
+        iif(RemainingWork ne null, RemainingWork, 0) with sum as SumRemainingWork
+    )
+    /compute(
+        (SumCompletedWork add SumRemainingWork) as TotalWork, 
+        SumCompletedWork as SumCompleted
+    )
+    /compute(
+        iif(TotalWork gt 0,(SumCompleted div cast(TotalWork, Edm.Double) mul 100), 0) as PercCompletedWork
+    )
+)&$select=WorkItemId, Title
+
+
+## Query for test execution status of requirements
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/TestPoints? 
+$apply=filter(
+    (TestSuite/RequirementWorkItem/IterationSK eq {iterationSK} 
+    and TestSuite/RequirementWorkItem/AreaSK eq {areaSK}
+    and TestSuite/RequirementWorkItem/Processes/any(p:p/BacklogType eq 'RequirementBacklog') 
+    and TestSuite/RequirementWorkItem/Processes/all(p:p/IsBugType eq false)
+    )
+)
+/compute(TestSuite/RequirementWorkItem/WorkItemId as WorkItemId, TestSuite/RequirementWorkItem/Title as WorkItemTitle)
+/groupby(
+    (WorkItemId, WorkItemTitle),
+    aggregate(
+        $count as TotalCount, 
+        cast(LastResultOutcome eq 'Passed', Edm.Int32) with sum as PassedCount, 
+        cast(LastResultOutcome eq 'Failed', Edm.Int32) with sum as FailedCount, 
+        cast(LastResultOutcome eq 'Blocked', Edm.Int32) with sum as BlockedCount,
+        cast(LastResultOutcome eq 'NotApplicable', Edm.Int32) with sum as NotApplicableCount,
+        cast(LastResultOutcome eq 'None', Edm.Int32) with sum as NotRunCount, 
+        cast(LastResultOutcome ne 'None', Edm.Int32) with sum as RunCount
+    )
+)
+
+## Query for status of bugs linked to the requirements
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+    $filter=(
+        IterationSK eq {iterationSK}  
+        and AreaSK eq {areaSK} 
+        and Processes/any(p:p/BacklogType eq 'RequirementBacklog') 
+        and Processes/all(p:p/IsBugType eq false)
+    )
+&$expand=Links(
+    $apply=filter(
+        (LinkTypeName eq 'Child' or LinkTypeName eq 'Related')
+        and TargetWorkItem/WorkItemType eq 'Bug'
+    )
+    /groupby(
+        (TargetWorkItem/State),
+        aggregate($count as Count)
+    )
+)&$select=WorkItemId,Title
+
+## Query for percentage of hours completion for requirements
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems? 
+$filter=( 
+    IterationSK eq {iterationSK}
+    and AreaSK eq {areaSK}
+    and WorkItemType eq 'Feature'
+)
+&$expand=Descendants( 
+    $apply=filter( CompletedWork ne null or RemainingWork ne null ) 
+    /aggregate( 
+        iif(CompletedWork ne null, CompletedWork, 0) with sum as SumCompletedWork, 
+        iif(RemainingWork ne null, RemainingWork, 0) with sum as SumRemainingWork 
+    ) 
+    /compute( 
+        (SumCompletedWork add SumRemainingWork) as TotalWork, 
+        SumCompletedWork as SumCompleted 
+    ) 
+    /compute( 
+        iif(TotalWork gt 0,(SumCompleted div cast(TotalWork, Edm.Double) mul 100), 0) as PercCompletedWork 
+    ) 
+)
+&$select=WorkItemId, Title
+
+
+## Query for test execution status of requirements
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/TestPoints? 
+$apply=filter(
+    (TestSuite/RequirementWorkItem/IterationSK eq {iterationSK}
+and TestSuite/RequirementWorkItem/AreaSK eq {areaSK}
+and TestSuite/RequirementWorkItem/Processes/any(p:p/BacklogType eq 'RequirementBacklog')
+and TestSuite/RequirementWorkItem/Processes/all(p:p/IsBugType eq false)
+))
+/compute(iif(TestSuite/RequirementWorkItem/Parent ne null, TestSuite/RequirementWorkItem/Parent/WorkItemId, 0) as ParentWorkItemId, 
+iif(TestSuite/RequirementWorkItem/Parent ne null, TestSuite/RequirementWorkItem/Parent/Title, 'Unparented') as ParentWorkItemTitle
+)/groupby(
+    (ParentWorkItemId, ParentWorkItemTitle), 
+    aggregate(
+        $count as TotalCount, 
+        cast(LastResultOutcome eq 'Passed', Edm.Int32) with sum as PassedCount, 
+        cast(LastResultOutcome eq 'Failed', Edm.Int32) with sum as FailedCount, 
+        cast(LastResultOutcome eq 'Blocked', Edm.Int32) with sum as BlockedCount,
+        cast(LastResultOutcome eq 'NotApplicable', Edm.Int32) with sum as NotApplicableCount,
+        cast(LastResultOutcome eq 'None', Edm.Int32) with sum as NotRunCount, 
+        cast(LastResultOutcome ne 'None', Edm.Int32) with sum as RunCount
+    )
+)
+
+## Query for status of bugs linked to the requirements
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/WorkItems?
+    $filter=(
+        IterationSK eq {iterationSK}
+        and AreaSK eq {areaSK}
+        and WorkItemType eq 'Feature'
+    )
+&$expand=Descendants(
+    $apply=filter(
+        WorkItemType eq 'Bug'
+    )
+    /groupby(
+        (State),
+        aggregate($count as Count)
+    )
+)
+&$select=WorkItemId,Title
+
+
+## Execution trend
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/TestPointHistorySnapshot? 
+$apply=filter( 
+    (TestSuite/TestPlanTitle eq '{testPlanTitle}') and (DateSK ge {startDate} and DateSK le {endDate}) 
+)
+/groupby( 
+    (DateSK),  
+    aggregate( 
+        $count as TotalCount, 
+        cast(ResultOutcome  eq 'Passed', Edm.Int32) with sum as Passed, 
+        cast(ResultOutcome  eq 'Failed', Edm.Int32) with sum as Failed, 
+        cast(ResultOutcome eq 'Blocked', Edm.Int32) with sum as Blocked, 
+        cast(ResultOutcome eq 'NotApplicable', Edm.Int32) with sum as NotApplicable, 
+        cast(ResultOutcome eq 'None', Edm.Int32) with sum as NotExecuted,  
+        cast(ResultOutcome ne 'None', Edm.Int32) with sum as Executed 
+    ) 
+)
+
+
+## Suite-level aggregation
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/TestPoints?  
+$apply=filter((TestSuite/TestPlanTitle eq '{testPlanTitle}' and TestSuite/IdLevel3 ne null)) 
+/groupby( 
+    (TestSuite/TitleLevel3), 
+    aggregate( 
+        $count as TotalCount,  
+        cast(LastResultOutcome eq 'Passed', Edm.Int32) with sum as PassedCount, 
+        cast(LastResultOutcome eq 'Failed', Edm.Int32) with sum as FailedCount, 
+        cast(LastResultOutcome eq 'None', Edm.Int32) with sum as  NotRunCount, 
+        cast(LastResultOutcome ne 'None', Edm.Int32) with sum as RunCount 
+    )
+)
+/compute( 
+    RunCount mul 100 div TotalCount as RunPercentage, 
+    NotRunCount mul 100 div TotalCount as NotRunPercentage, 
+    iif(TotalCount gt NotRunCount, PassedCount mul 100 div RunCount,0) as PassedPercentage, 
+    iif(TotalCount gt NotRunCount, FailedCount mul 100 div RunCount,0) as FailedPercentage 
+) 
+&$orderby=RunPercentage desc
+
+
+## Test by outcome matrix
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/TestPoints?  
+    $apply=filter((TestSuite/TestPlanTitle eq '{testPlanTitle}')) 
+    /groupby(
+        (Tester/UserName, LastResultOutcome),  
+        aggregate($count as Count) 
+    )
+
+
+## Configuration by outcome matrix
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/TestPoints?  
+    $apply=filter((TestSuite/TestPlanTitle eq '{testPlanTitle}')) 
+    /groupby( 
+        (TestConfiguration/Name, LastResultOutcome),  
+        aggregate($count as Count) 
+    )
