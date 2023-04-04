@@ -1,0 +1,425 @@
+## Model
+https://analytics.dev.azure.com/{org}/_odata/v4.0-preview/$metadata
+
+## Burndown - Release
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(not(State in ('{{ResolvedState}}', '{{ClosedState}}')))/
+	filter(DateValue ge {{ReleaseStartDate}} and DateValue le {{ReleaseEndDate}})/
+	groupby(
+		(DateValue), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+
+## Burndown by State - Release
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(not(State in ('{{ResolvedState}}', '{{ClosedState}}')))/
+	filter(DateValue ge {{ReleaseStartDate}} and DateValue le {{ReleaseEndDate}})/
+	groupby(
+		(DateValue, State), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+
+## Burndown with Tags - Release
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(not(State in ('{{ResolvedState}}', '{{ClosedState}}')))/
+	filter(TagNames in ('{{Tag}}'))/
+	filter(DateValue ge {{ReleaseStartDate}} and DateValue le {{ReleaseEndDate}})/
+	groupby(
+		(DateValue), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+		
+## Burndown - Iteration
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(Iteration/IterationName eq '{{IterationName}}')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(not(State in ('{{ResolvedState}}', '{{ClosedState}}')))/
+	filter(DateValue ge Iteration/StartDate and DateValue le Iteration/EndDate)/
+	groupby(
+		(DateValue), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+
+## Burndown by State - Iteration
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(Iteration/IterationName eq '{{IterationName}}')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(not(State in ('{{ResolvedState}}', '{{ClosedState}}')))/
+	filter(DateValue ge Iteration/StartDate and DateValue le Iteration/EndDate)/
+	groupby(
+		(DateValue, State), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+		
+## Burndown by RemainingWork - Iteration
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(Iteration/IterationName eq '{{IterationName}}')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(not(State in ('{{ResolvedState}}', '{{ClosedState}}')))/
+	filter(DateValue ge Iteration/StartDate and DateValue le Iteration/EndDate)/
+	groupby(
+		(DateValue), 
+			aggregate(RemainingWork with sum as TotalRemainingWork)
+		)
+
+## Burnup - Release
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(State in ('{{ResolvedState}}', '{{ClosedState}}'))/
+	filter(DateValue ge {{ReleaseStartDate}} and DateValue le {{ReleaseEndDate}})/
+	groupby(
+		(DateValue), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+
+## Velocity
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItems?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(State in ('{{ResolvedState}}', '{{ClosedState}}'))/
+	groupby(
+		(Iteration/IterationName), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+		
+## Velocity by StateCategory
+https://analytics.dev.azure.com/ivee/iv/_odata/v2.0/WorkItems?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'iv Team'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(State in ('Resolved', 'Closed'))/
+	groupby(
+		(Iteration/IterationName), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+
+https://analytics.dev.azure.com/ivee/iv/_odata/v2.0/WorkItems?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'iv Team'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	groupby(
+		(Iteration/IterationName, StateCategory), 
+			aggregate(StoryPoints with sum as TotalStoryPoints, Iteration/StartDate with min as StartDate)
+		)
+
+https://analytics.dev.azure.com/ivee/iv/_odata/v2.0/WorkItems?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'iv Team'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(StateCategory in ('Resolved', 'Completed'))/
+	groupby(		(Iteration/IterationName), 			aggregate(StoryPoints with sum as TotalStoryPoints)		)
+
+
+# Pipelines
+
+## Pipeline duration for a named pipeline
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	and CompletedDate ge {startdate}
+	)
+/aggregate(
+	$count as TotalCount,
+	SucceededCount with sum as SucceededCount ,
+	FailedCount with sum as FailedCount,
+	PartiallySucceededCount with sum as PartiallySucceededCount ,
+	CanceledCount with sum as CanceledCount
+	)
+
+## Pipeline run outcome summary for a specific pipeline ID
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    PipelineId eq {pipelineId}
+    and CompletedDate ge {startdate}
+    )
+/aggregate(
+    $count as TotalCount,
+    SucceededCount with sum as SucceededCount ,
+    FailedCount with sum as FailedCount,
+    PartiallySucceededCount with sum as PartiallySucceededCount ,
+    CanceledCount with sum as CanceledCount
+)
+
+## Pipeline run outcome summary filtered by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and CompletedDate ge {startdate}
+    )
+/groupby(
+(Branch/BranchName),
+aggregate(
+    $count as TotalCount,
+    SucceededCount with sum as SucceededCount ,
+    FailedCount with sum as FailedCount,
+    PartiallySucceededCount with sum as PartiallySucceededCount ,
+    CanceledCount with sum as CanceledCount
+    ))
+
+## Outcome summary for all project pipelines
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    CompletedDate ge {startdate}
+    )
+/groupby(
+(Pipeline/PipelineName),
+aggregate(
+    $count as TotalCount,
+    SucceededCount with sum as SucceededCount ,
+    FailedCount with sum as FailedCount,
+    PartiallySucceededCount with sum as PartiallySucceededCount ,
+    CanceledCount with sum as CanceledCount
+    ))
+
+## Outcome summary for all pipelines
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?%20
+$apply=filter(
+	CompletedDate ge {startdate}
+	)
+/groupby(
+(Pipeline/PipelineName), 
+aggregate(
+	$count as TotalCount,
+	SucceededCount with sum as SucceededCount,
+	FailedCount with sum as FailedCount,
+	PartiallySucceededCount with sum as PartiallySucceededCount,
+	CanceledCount with sum as CanceledCount
+))
+
+## Pass rate trend for a named pipeline
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+	Pipeline/PipelineName eq '{pipelineName}'
+	and CompletedDate ge {startdate}
+	and CanceledCount ne 1
+	)
+/groupby(
+	(CompletedOn/Date),
+	aggregate
+	($count as TotalCount,
+	SucceededCount with sum as SucceededCount ,
+	FailedCount with sum as FailedCount,
+	PartiallySucceededCount with sum as PartiallySucceededCount))
+/compute(
+SucceededCount mul 100.0 div TotalCount as PassRate,
+FailedCount mul 100.0 div TotalCount as FailRate,
+PartiallySucceededCount mul 100.0 div TotalCount as PartiallySuccessfulRate)
+&$orderby=CompletedOn/Date asc
+
+## Pass rate trend, filter by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+	PipelineId eq {pipelineId}
+	and CompletedDate ge {startdate}
+	and CanceledCount ne 1
+	)
+/groupby(
+	(CompletedOn/Date),
+	aggregate
+	($count as TotalCount,
+	SucceededCount with sum as SucceededCount ,
+	FailedCount with sum as FailedCount,
+	PartiallySucceededCount with sum as PartiallySucceededCount))
+/compute(
+SucceededCount mul 100.0 div TotalCount as PassRate,
+FailedCount mul 100.0 div TotalCount as FailRate,
+PartiallySucceededCount mul 100.0 div TotalCount as PartiallySuccessfulRate)
+&$orderby=CompletedOn/Date asc
+
+## Pass rate trend, filter by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelineName}'
+    and CompletedDate ge {startdate}
+    and CanceledCount ne 1
+    )
+/groupby(
+    (Branch/BranchName, CompletedOn/Date),
+    aggregate
+    ($count as TotalCount,
+    SucceededCount with sum as SucceededCount ,
+    FailedCount with sum as FailedCount,
+    PartiallySucceededCount with sum as PartiallySucceededCount))
+/compute(
+SucceededCount mul 100.0 div TotalCount as PassRate,
+FailedCount mul 100.0 div TotalCount as FailRate,
+PartiallySucceededCount mul 100.0 div TotalCount as PartiallySuccessfulRate)
+&$orderby=CompletedOn/Date asc
+
+## Pass rate trend, filter by build reason
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelineName}'
+    and CompletedDate ge {startdate}
+    and CanceledCount ne 1
+    )
+/groupby(
+    (RunReason, CompletedOn/Date),
+    aggregate
+    ($count as TotalCount,
+    SucceededCount with sum as SucceededCount ,
+    FailedCount with sum as FailedCount,
+    PartiallySucceededCount with sum as PartiallySucceededCount))
+/compute(
+SucceededCount mul 100.0 div TotalCount as PassRate,
+FailedCount mul 100.0 div TotalCount as FailRate,
+PartiallySucceededCount mul 100.0 div TotalCount as PartiallySuccessfulRate)
+&$orderby=CompletedOn/Date asc
+
+## Pass rate trend for all project pipelines
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    CompletedDate ge {startdate}
+    and CanceledCount ne 1
+    )
+/groupby(
+    (Pipeline/PipelineName, CompletedOn/Date),
+    aggregate
+    ($count as TotalCount,
+    SucceededCount with sum as SucceededCount ,
+    FailedCount with sum as FailedCount,
+    PartiallySucceededCount with sum as PartiallySucceededCount))
+/compute(
+SucceededCount mul 100.0 div TotalCount as PassRate,
+FailedCount mul 100.0 div TotalCount as FailRate,
+PartiallySucceededCount mul 100.0 div TotalCount as PartiallySuccessfulRate)
+&$orderby=CompletedOn/Date asc
+
+
+
+## Stagewise failure trend
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and PipelineRunCompletedOn/Date ge {startdate}
+    and PipelineRunOutcome eq 'Failed'
+    and TaskOutcome eq 'Failed'
+    )
+/groupby(
+    (PipelineRunCompletedOn/Date, PipelineRunId, PipelineJob/StageName ),
+    aggregate (FailedCount with sum as FailedCount))
+/groupby(
+    (PipelineRunCompletedOn/Date, PipelineJob/StageName ),
+    aggregate
+(cast(FailedCount gt 0, Edm.Int32) with sum as FailedStageCount))
+
+
+## Task wise failure trend
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and PipelineRunCompletedOn/Date ge {startdate}
+    and PipelineRunOutcome eq 'Failed'
+    and TaskOutcome eq 'Failed'
+    )
+/groupby(
+    (PipelineRunCompletedOn/Date, TaskDisplayName),
+    aggregate
+(FailedCount with sum as FailedCount))
+
+## Job wise failure trend
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and PipelineRunCompletedOn/Date ge {startdate}
+    and PipelineRunOutcome eq 'Failed'
+    and TaskOutcome eq 'Failed'
+    )
+/groupby(
+    (PipelineRunCompletedOn/Date, PipelineRunId, PipelineJob/JobName ),
+    aggregate (FailedCount with sum as FailedCount))
+/groupby(
+    (PipelineRunCompletedOn/Date, PipelineJob/JobName ),
+    aggregate
+(cast(FailedCount gt 0, Edm.Int32) with sum as FailedJobCount))
+
+## Return percentile durations for a specified pipeline, filter by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.5, BranchSK) as Duration50thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.8, BranchSK) as Duration80thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.95, BranchSK) as Duration95thPercentileInSeconds)
+/groupby(
+(Duration50thPercentileInSeconds, Duration80thPercentileInSeconds,Duration95thPercentileInSeconds, Branch/BranchName))
+
+## Return percentile durations for all project pipelines
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.5, PipelineId) as Duration50thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.8, PipelineId) as Duration80thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.95, PipelineId) as Duration95thPercentileInSeconds)
+/groupby(
+(Duration50thPercentileInSeconds, Duration80thPercentileInSeconds,Duration95thPercentileInSeconds, Pipeline/PipelineName))
+
+
+
+## Return percentile durations for a specified pipeline
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.5) as Duration50thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.8) as Duration80thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.95) as Duration95thPercentileInSeconds)
+/groupby(
+(Duration50thPercentileInSeconds, Duration80thPercentileInSeconds,Duration95thPercentileInSeconds))
+
+## Return percentile durations for a specified pipeline ID
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    PipelineId  eq {pipelineid}
+    and CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.5) as Duration50thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.8) as Duration80thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.95) as Duration95thPercentileInSeconds)
+/groupby(
+(Duration50thPercentileInSeconds, Duration80thPercentileInSeconds,Duration95thPercentileInSeconds))
+
+## Return percentile durations for a specified pipeline, filter by branch
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    Pipeline/PipelineName eq '{pipelinename}'
+    and CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.5, BranchSK) as Duration50thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.8, BranchSK) as Duration80thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.95, BranchSK) as Duration95thPercentileInSeconds)
+/groupby(
+(Duration50thPercentileInSeconds, Duration80thPercentileInSeconds,Duration95thPercentileInSeconds, Branch/BranchName))
+
+## Return percentile durations for all project pipelines
+https://analytics.dev.azure.com/{organization}/{project}/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    CompletedDate ge {startdate}
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.5, PipelineId) as Duration50thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.8, PipelineId) as Duration80thPercentileInSeconds,
+    percentile_cont(TotalDurationSeconds, 0.95, PipelineId) as Duration95thPercentileInSeconds)
+/groupby(
+(Duration50thPercentileInSeconds, Duration80thPercentileInSeconds,Duration95thPercentileInSeconds, Pipeline/PipelineName))

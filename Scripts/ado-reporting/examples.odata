@@ -1,0 +1,305 @@
+https://analytics.dev.azure.com/daradu/_odata/v4.0-preview/$metadata
+
+https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v2.0/WorkItems?
+  $filter=Iteration/IterationPath eq 'dawr-demo\Iteration 1\Sprint 3'
+  &$select=WorkItemId, Title, State,Effort
+
+https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v2.0/WorkItems?%24select=WorkItemId%2C+Title%2C+State%2CEffort&%24filter=Iteration%2FIterationPath+eq+%27dawr-demo%5CIteration+1%5CSprint+3%27
+
+https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v2.0/WorkItems?
+  $apply=filter(Area/AreaPath eq 'dawr-demo' and State eq 'Done')/groupby((Iteration/IterationPath), aggregate(Effort with sum as TotalEffort))
+  
+https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v2.0/WorkItems?
+  $apply=filter(Area/AreaPath eq 'dawr-demo' and State ne 'Done')/groupby((Iteration/IterationPath), aggregate(Effort with sum as TotalEffort))
+
+https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v2.0/WorkItems?
+  $apply=filter(Area/AreaPath eq 'dawr-demo' and WorkItemType in ('Product Backlog Item', 'Bug'))/groupby((Iteration/IterationPath, State), aggregate(Effort with sum as TotalEffort))
+  
+
+https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v4.0-preview/TaskAgentPoolSizeSnapshots
+
+ContosoAir - Agile
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/$metadata
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(Area/AreaPath eq 'Unknown' and WorkItemType in ('User Story', 'Bug'))/
+	groupby(
+	  (Iteration/IterationPath, State), 
+	  aggregate(StoryPoints with sum as TotalPoints)
+    )
+
+https://msit.powerbi.com/view?r=eyJrIjoiYzNkM2UyZTMtM2Y4ZC00MDU0LThlYzctODBhNjI3MmEwODY1IiwidCI6IjcyZjk4OGJmLTg2ZjEtNDFhZi05MWFiLTJkN2NkMDExZGI0NyIsImMiOjV9
+
+  
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=filter(Iteration/IterationPath eq 'ContosoAir\Iteration 2' and WorkItemType in ('User Story', 'Bug'))/groupby((ChangedDate, State), aggregate(StoryPoints with sum as TotalPoints))
+  
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=
+    filter(((Iteration/StartDate le date(now())) and (Iteration/EndDate ge date(now())))
+      and WorkItemType in ('User Story', 'Bug'))/
+	aggregate(StoryPoints with sum as TotalPoints, Iteration/StartDate with max as StartDate, Iteration/EndDate with max as EndDate)
+
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(Iteration/IterationPath eq 'ContosoAir\Iteration 2' and WorkItemType in ('User Story', 'Bug'))/
+    groupby(
+      (DateValue, State), 
+      aggregate(StoryPoints with sum as TotalPoints)
+    )
+	
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(WorkItemType in ('User Story', 'Bug') and State ne 'Closed' and ((Iteration/StartDate le date(now())) and (Iteration/EndDate ge date(now()))))/
+    groupby(
+      (DateValue), 
+      aggregate(StoryPoints with sum as TotalPoints, Iteration/StartDate with max as StartDate, Iteration/EndDate with max as EndDate)
+    )
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(WorkItemType in ('User Story', 'Bug') and State eq 'Closed' 
+	  and ((Iteration/StartDate le date(now())) and (Iteration/EndDate ge date(now()))))/
+    groupby(
+      (DateValue), 
+      aggregate(StoryPoints with sum as TotalPoints)
+    )
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(WorkItemType in ('User Story', 'Bug')  and ((Iteration/StartDate le date(now())) and (Iteration/EndDate ge date(now()))))/
+    groupby(
+      (DateValue), 
+      aggregate(StoryPoints with sum as TotalPoints)
+    )
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?$select=WorkItemId,Title,StoryPoints
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?$select=WorkItemId,Title,StoryPoints&$expand=Iteration&$filter=(Iteration/StartDate le 2019-06-25Z) and (Iteration/EndDate ge 2019-06-25Z)
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemBoardSnapshot?
+  $apply=
+    filter(DateValue ge 2019-06-25Z and DateValue le 2019-07-16Z)/
+	filter(BoardName eq 'Stories' and Team/TeamName eq 'ContosoAir Team')/
+	groupby((DateValue, ColumnName), aggregate(StoryPoints with sum as TotalPoints))
+  &$orderby=DateValue
+  
+
+-- All changes
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemRevisions?
+  $apply=
+    filter(WorkItem/WorkItemType in ('User Story', 'Bug') and WorkItem/State eq 'Done' 
+	  and Teams/TeamName eq 'ContosoAir Team'
+	  and ((Iteration/StartDate le date(now())) and (Iteration/EndDate ge date(now()))))/
+    groupby(
+      (StateChangeOn), 
+      aggregate(WorkItem/StoryPoints with sum as TotalPoints)
+    )
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=
+    filter(Iteration/IterationName eq 'Iteration 2')/
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby((State), aggregate(StoryPoints with sum as TotalPoints))
+
+-- Total points by Iteration, State for a team
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby((Iteration/IterationName, State), aggregate(StoryPoints with sum as TotalPoints))
+
+-- Total "non-closed" points by Iteration for a team
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+	filter(State ne 'Closed')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby((Iteration/IterationName), aggregate(StoryPoints with sum as TotalPoints))
+-- Total "closed" points by Iteration for a team
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+	filter(State eq 'Closed')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby((Iteration/IterationName), aggregate(StoryPoints with sum as TotalPoints))
+
+-- Total "non-closed" points by Iteration for a team, within a period
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=
+    filter(date(Iteration/EndDate) ge 2019-06-01Z and date(Iteration/EndDate) le 2019-06-30Z)/
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+	filter(State ne 'Closed')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby((Iteration/IterationName), aggregate(StoryPoints with sum as TotalPoints))
+-- Total "closed" points by Iteration for a team, within a period
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=
+    filter(date(Iteration/EndDate) ge 2019-06-01Z and date(Iteration/EndDate) le 2019-06-30Z)/
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+	filter(State eq 'Closed')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby((Iteration/IterationName), aggregate(StoryPoints with sum as TotalPoints))
+-- Total "closed" points by Iteration for a team, for specific Iterations
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItems?
+  $apply=
+    filter(Iteration/IterationName in ('Iteration 1', 'Iteration 2', 'Iteration 3', 'Iteration 4', 'Iteration 5'))/
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+	filter(State eq 'Closed')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby((Iteration/IterationName), aggregate(StoryPoints with sum as TotalPoints))
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v3.0-preview/Builds
+
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+    filter(Iteration/IterationName eq 'Iteration 2')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby(
+      (DateValue), 
+      aggregate(StoryPoints with sum as TotalPoints, date(Iteration/StartDate) with max as StartDate, date(Iteration/EndDate) with max as EndDate)
+    )
+	&$orderby=DateValue
+	&$top=1
+
+-- Ideal trend
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/Iterations?
+  $apply=
+    filter(Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+    filter(IterationName eq 'Iteration 2')/
+	aggregate(EndDate with max as DateValue, 0 with sum as TotalPoints)
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+    filter(Iteration/IterationName eq 'Iteration 2')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby(
+      (DateValue), 
+      aggregate(StoryPoints with sum as TotalPoints)
+    )
+	&$orderby=DateValue
+-- Total points for a team and an iteration by state (snapshot)
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+    filter(Iteration/IterationName eq 'Iteration 2')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+    groupby(
+      (DateValue, State), 
+      aggregate(StoryPoints with sum as TotalPoints)
+    )
+-- Total "non-closed" points for a team and an iteration (snapshot)
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+    filter(Iteration/IterationName eq 'Iteration 2')/
+    filter(WorkItemType in ('User Story', 'Bug') and State ne 'Closed')/
+    groupby(
+      (DateValue), 
+      aggregate(StoryPoints with sum as TotalPoints, Iteration/StartDate with max as StartDate, Iteration/EndDate with max as EndDate)
+    )
+-- Total "closed" points for a team and an iteration (snapshot)
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+  $apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq 'ContosoAir Team'))/
+    filter(Iteration/IterationName eq 'Iteration 2')/
+    filter(WorkItemType in ('User Story', 'Bug') and State eq 'Closed')/
+    groupby(
+      (DateValue), 
+      aggregate(StoryPoints with sum as TotalPoints, Iteration/StartDate with max as StartDate, Iteration/EndDate with max as EndDate)
+    )
+--Release burndown
+https://analytics.dev.azure.com/daradu/ContosoAir/_odata/v2.0/WorkItemSnapshot?
+	$apply=
+		filter(State ne 'Closed')/
+		filter(DateValue ge 2019-06-03Z and DateValue le 2019-07-16Z)/
+		groupby(
+			(DateValue), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+		
+-- Burndown (release) 	
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+	filter(State ne '{{ClosedState}}')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(DateValue ge {{ReleaseStartDate}} and DateValue le {{ReleaseEndDate}})/
+	groupby(
+		(DateValue), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+		
+-- Burndown (iteration) 	
+	filter(DateValue ge {{IterationStartDate}} and DateValue le {{IterationEndDate}})/
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(Iteration/IterationName eq '{{IterationName}}')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(State ne '{{ClosedState}}')/
+	filter(DateValue ge Iteration/StartDate and DateValue le Iteration/EndDate)/
+	groupby(
+		(DateValue), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+		
+-- Burndown by state (release)
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+	filter(State ne '{{ClosedState}}')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(DateValue ge {{ReleaseStartDate}} and DateValue le {{ReleaseEndDate}})/
+	groupby(
+		(DateValue, State), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+
+-- Burndown by State (iteration) 	
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+    filter(Iteration/IterationName eq '{{IterationName}}')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(State ne '{{ClosedState}}')/
+	filter(DateValue ge Iteration/StartDate and DateValue le Iteration/EndDate)/
+	groupby(
+		(DateValue, State), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+
+-- Burndown with Tags (release) 	
+https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItemSnapshot?$apply=
+    filter(Iteration/Teams/any(t: t/TeamName eq '{{TeamName}}'))/
+	filter(State ne '{{ClosedState}}')/
+    filter(WorkItemType in ('User Story', 'Bug'))/
+	filter(TagNames in ('{{Tag}}'))/
+	filter(DateValue ge {{ReleaseStartDate}} and DateValue le {{ReleaseEndDate}})/
+	groupby(
+		(DateValue), 
+			aggregate(StoryPoints with sum as TotalStoryPoints)
+		)
+
+
+# Pass rate trend for a named pipeline
+https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+	Pipeline/PipelineName eq 'ETSDemo-CI'
+	and CompletedDate ge 2022-01-01Z
+	and CanceledCount ne 1
+	)
+/groupby(
+	(CompletedOn/Date),
+	aggregate
+	($count as TotalCount,
+	SucceededCount with sum as SucceededCount ,
+	FailedCount with sum as FailedCount,
+	PartiallySucceededCount with sum as PartiallySucceededCount))
+/compute(
+SucceededCount mul 100.0 div TotalCount as PassRate,
+FailedCount mul 100.0 div TotalCount as FailRate,
+PartiallySucceededCount mul 100.0 div TotalCount as PartiallySuccessfulRate)
+&$orderby=CompletedOn/Date asc
+
+# Pass rate trend for a named pipeline
+https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v3.0-preview/PipelineRuns?%24orderby=CompletedOn%2FDate+asc&%24apply=filter%28+Pipeline%2FPipelineName+eq+%27ETSDemo-CI%27+and+CompletedDate+ge+2022-01-01Z+and+CanceledCount+ne+1+%29+%2Fgroupby%28+%28CompletedOn%2FDate%29%2C+aggregate+%28%24count+as+TotalCount%2C+SucceededCount+with+sum+as+SucceededCount+%2C+FailedCount+with+sum+as+FailedCount%2C+PartiallySucceededCount+with+sum+as+PartiallySucceededCount%29%29+%2Fcompute%28+SucceededCount+mul+100.0+div+TotalCount+as+PassRate%2C+FailedCount+mul+100.0+div+TotalCount+as+FailRate%2C+PartiallySucceededCount+mul+100.0+div+TotalCount+as+PartiallySuccessfulRate%29
