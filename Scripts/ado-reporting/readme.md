@@ -134,6 +134,10 @@ https://analytics.dev.azure.com/{{org}}/{{project}}/_odata/v2.0/WorkItems?$apply
 
 ## Azure Boards queries
 
+See documentation here:
+
+https://learn.microsoft.com/en-us/azure/devops/report/extend-analytics/quick-ref?view=azure-devops#azure-boards-sample-widgets-and-reports
+
 ### Bug trend filtered by Area Path
 
 ``` OData
@@ -467,6 +471,10 @@ $apply=filter(
 
 ## Pipeline Tests
 
+See documentation here:
+
+https://learn.microsoft.com/en-us/azure/devops/report/extend-analytics/quick-ref?view=azure-devops#azure-pipelines-sample-widgets-and-reports
+
 ### Test summary for Build workflow
 
 ``` OData
@@ -618,6 +626,10 @@ $apply=filter(
 ```
 
 ## Test Plans
+
+See documentation here:
+
+https://learn.microsoft.com/en-us/azure/devops/report/extend-analytics/quick-ref?view=azure-devops#azure-test-plans-sample-widgets-and-reports
 
 ### Progress status
 
