@@ -303,3 +303,116 @@ PartiallySucceededCount mul 100.0 div TotalCount as PartiallySuccessfulRate)
 
 # Pass rate trend for a named pipeline
 https://analytics.dev.azure.com/daradu/dawr-demo/_odata/v3.0-preview/PipelineRuns?%24orderby=CompletedOn%2FDate+asc&%24apply=filter%28+Pipeline%2FPipelineName+eq+%27ETSDemo-CI%27+and+CompletedDate+ge+2022-01-01Z+and+CanceledCount+ne+1+%29+%2Fgroupby%28+%28CompletedOn%2FDate%29%2C+aggregate+%28%24count+as+TotalCount%2C+SucceededCount+with+sum+as+SucceededCount+%2C+FailedCount+with+sum+as+FailedCount%2C+PartiallySucceededCount+with+sum+as+PartiallySucceededCount%29%29+%2Fcompute%28+SucceededCount+mul+100.0+div+TotalCount+as+PassRate%2C+FailedCount+mul+100.0+div+TotalCount+as+FailRate%2C+PartiallySucceededCount+mul+100.0+div+TotalCount+as+PartiallySuccessfulRate%29
+
+
+# CFD
+https://analytics.dev.azure.com/ZipZappAus/ContosoAir/_odata/V3.0-preview/WorkItemBoardSnapshot?
+        $apply=filter(
+            Team/TeamName eq 'ContosoAir Team'
+            and BoardName eq 'Stories' 
+            and DateValue ge 2023-01-01Z
+        )
+        /groupby(
+            (DateValue,ColumnName,LaneName,State,WorkItemType,AssignedTo/UserName,Area/AreaPath), 
+            aggregate($count as Count)
+        )
+
+https://analytics.dev.azure.com/ZipZappAus/ContosoAir/_odata/V3.0-preview/WorkItemBoardSnapshot?%24apply=filter%28+Team%2FTeamName+eq+%27ContosoAir+Team%27+and+BoardName+eq+%27Stories%27+and+DateValue+ge+2023-01-01Z+%29+%2Fgroupby%28+%28DateValue%2CColumnName%2CLaneName%2CState%2CWorkItemType%2CAssignedTo%2FUserName%2CArea%2FAreaPath%29%2C+aggregate%28%24count+as+Count%29+%29
+
+
+# Outcome summary for all project pipelines
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    CompletedDate ge 2023-01-01Z
+    )
+/groupby(
+(Pipeline/PipelineName),
+aggregate(
+    $count as TotalCount,
+    SucceededCount with sum as SucceededCount ,
+    FailedCount with sum as FailedCount,
+    PartiallySucceededCount with sum as PartiallySucceededCount ,
+    CanceledCount with sum as CanceledCount
+    ))
+
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/PipelineRuns?%24apply=filter%28+CompletedDate+ge+2023-01-01Z+%29+%2Fgroupby%28+%28Pipeline%2FPipelineName%29%2C+aggregate%28+%24count+as+TotalCount%2C+SucceededCount+with+sum+as+SucceededCount+%2C+FailedCount+with+sum+as+FailedCount%2C+PartiallySucceededCount+with+sum+as+PartiallySucceededCount+%2C+CanceledCount+with+sum+as+CanceledCount+%29%29
+
+# Duration trend for all project pipelines
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/PipelineRuns?
+$apply=filter(
+    CompletedDate ge 2023-01-01Z
+    and (SucceededCount eq 1 or PartiallySucceededCount eq 1)
+    )
+/compute(
+    percentile_cont(TotalDurationSeconds, 0.8,PipelineId, CompletedDateSK) as Duration80thPercentileInSeconds)
+/groupby(
+    (Duration80thPercentileInSeconds, Pipeline/PipelineName, CompletedOn/Date))
+&$orderby=CompletedOn/Date asc
+
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/PipelineRuns?%24orderby=CompletedOn%2FDate+asc&%24apply=filter%28+CompletedDate+ge+2023-01-01Z+and+%28SucceededCount+eq+1+or+PartiallySucceededCount+eq+1%29+%29+%2Fcompute%28+percentile_cont%28TotalDurationSeconds%2C+0.8%2CPipelineId%2C+CompletedDateSK%29+as+Duration80thPercentileInSeconds%29+%2Fgroupby%28+%28Duration80thPercentileInSeconds%2C+Pipeline%2FPipelineName%2C+CompletedOn%2FDate%29%29
+
+# Task Duration
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/PipelineRunActivityResults?
+$apply=filter(
+    Pipeline/PipelineName eq 'appdata-api-C'
+    and PipelineRunCompletedOn/Date ge 2023-01-01Z
+    and (PipelineRunOutcome eq 'Succeed' or PipelineRunOutcome eq 'PartiallySucceeded')
+    and (CanceledCount ne 1 and SkippedCount ne 1 and AbandonedCount ne 1)
+    )
+/compute(
+    percentile_cont(ActivityDurationSeconds, 0.5, TaskDisplayName) as TaskDuration50thPercentileInSeconds,
+    percentile_cont(ActivityDurationSeconds, 0.8, TaskDisplayName) as TaskDuration80thPercentileInSeconds,
+    percentile_cont(ActivityDurationSeconds, 0.95, TaskDisplayName) as TaskDuration95thPercentileInSeconds)
+/groupby(
+    (TaskDuration50thPercentileInSeconds, TaskDuration80thPercentileInSeconds,TaskDuration95thPercentileInSeconds, TaskDisplayName))
+&$orderby=TaskDuration50thPercentileInSeconds desc
+
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/PipelineRunActivityResults?%24orderby=TaskDuration50thPercentileInSeconds+desc&%24apply=filter%28+Pipeline%2FPipelineName+eq+%27appdata-api-C%27+and+PipelineRunCompletedOn%2FDate+ge+2023-01-01Z+and+%28PipelineRunOutcome+eq+%27Succeed%27+or+PipelineRunOutcome+eq+%27PartiallySucceeded%27%29+and+%28CanceledCount+ne+1+and+SkippedCount+ne+1+and+AbandonedCount+ne+1%29+%29+%2Fcompute%28+percentile_cont%28ActivityDurationSeconds%2C+0.5%2C+TaskDisplayName%29+as+TaskDuration50thPercentileInSeconds%2C+percentile_cont%28ActivityDurationSeconds%2C+0.8%2C+TaskDisplayName%29+as+TaskDuration80thPercentileInSeconds%2C+percentile_cont%28ActivityDurationSeconds%2C+0.95%2C+TaskDisplayName%29+as+TaskDuration95thPercentileInSeconds%29+%2Fgroupby%28+%28TaskDuration50thPercentileInSeconds%2C+TaskDuration80thPercentileInSeconds%2CTaskDuration95thPercentileInSeconds%2C+TaskDisplayName%29%29
+
+
+# Return Features and their child User Stories
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'Feature'
+            and State ne 'Closed' and State ne 'Removed'
+            and startswith(Area/AreaPath,'AppBuilder')
+        &$select=WorkItemId,Title,WorkItemType,State,AreaSK
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath),
+                Links(
+                    $filter=LinkTypeName eq 'Child'
+                        and TargetWorkItem/WorkItemType eq 'User Story';
+                    $select=LinkTypeName;
+                    $expand=TargetWorkItem($select=WorkItemType,WorkItemId,Title,State)
+                )
+
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/WorkItems?%24select=WorkItemId%2CTitle%2CWorkItemType%2CState%2CAreaSK+&%24expand=AssignedTo%28%24select%3DUserName%29%2CIteration%28%24select%3DIterationPath%29%2CArea%28%24select%3DAreaPath%29%2C+Links%28+%24filter%3DLinkTypeName+eq+%27Child%27+and+TargetWorkItem%2FWorkItemType+eq+%27User+Story%27%3B+%24select%3DLinkTypeName%3B+%24expand%3DTargetWorkItem%28%24select%3DWorkItemType%2CWorkItemId%2CTitle%2CState%29+%29&%24filter=WorkItemType+eq+%27Feature%27+and+State+ne+%27Closed%27+and+State+ne+%27Removed%27+and+startswith%28Area%2FAreaPath%2C%27AppBuilder%27%29
+
+# Burndown User Stories for an area path and the current iteration
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/WorkItemSnapshot? 
+        $apply=filter(
+            WorkItemType eq 'User Story'
+            and startswith(Area/AreaPath,'AppBuilder')
+            and StateCategory ne 'Completed'
+            and DateValue ge Iteration/StartDate
+            and DateValue le Iteration/EndDate
+            and Iteration/StartDate le now() 
+            and Iteration/EndDate ge now()
+        )
+        /groupby(
+            (DateValue,State,WorkItemType,Priority,Area/AreaPath,Iteration/IterationPath),
+            aggregate($count as Count, StoryPoints with sum as TotalStoryPoints)
+        )
+
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/WorkItemSnapshot?%24apply=filter%28+WorkItemType+eq+%27User+Story%27+and+startswith%28Area%2FAreaPath%2C%27AppBuilder%27%29+and+StateCategory+ne+%27Completed%27+and+DateValue+ge+Iteration%2FStartDate+and+DateValue+le+Iteration%2FEndDate+and+Iteration%2FStartDate+le+now%28%29+and+Iteration%2FEndDate+ge+now%28%29+%29+%2Fgroupby%28+%28DateValue%2CState%2CWorkItemType%2CPriority%2CArea%2FAreaPath%2CIteration%2FIterationPath%29%2C+aggregate%28%24count+as+Count%2C+StoryPoints+with+sum+as+TotalStoryPoints%29+%29
+
+
+# Return Lead Time and Cycle Time for User Stories and Area Path
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/WorkItems?
+        $filter=WorkItemType eq 'User Story'
+            and StateCategory eq 'Completed'
+            and CompletedDate ge 2023-01-01Z
+            and startswith(Area/AreaPath,'AppBuilder')
+        &$select=WorkItemId,Title,WorkItemType,State,Priority,AreaSK
+            ,CycleTimeDays,LeadTimeDays,CompletedDateSK
+        &$expand=AssignedTo($select=UserName),Iteration($select=IterationPath),Area($select=AreaPath)
+
+https://analytics.dev.azure.com/ZipZappAus/AppBuilder/_odata/v3.0-preview/WorkItems?%24select=WorkItemId%2CTitle%2CWorkItemType%2CState%2CPriority%2CAreaSK+%2CCycleTimeDays%2CLeadTimeDays%2CCompletedDateSK+&%24expand=AssignedTo%28%24select%3DUserName%29%2CIteration%28%24select%3DIterationPath%29%2CArea%28%24select%3DAreaPath%29&%24filter=WorkItemType+eq+%27User+Story%27+and+StateCategory+eq+%27Completed%27+and+CompletedDate+ge+2023-01-01Z+and+startswith%28Area%2FAreaPath%2C%27AppBuilder%27%29
