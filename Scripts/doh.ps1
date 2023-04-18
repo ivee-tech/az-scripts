@@ -475,6 +475,28 @@ $queryString = "select [System.Id], [System.WorkItemType], [System.Title], [Micr
 $suite = Set-TestPlanSuite -planId $planId -suiteId $suiteId -queryString $queryString -context $ctx
 $suite
 
+
+# tag build run
+
+$svr = 'dev.azure.com';
+$org = 'ZipZappAus';
+$projName = 'Demos';
+$pat = '***'
+$apiVersion = '7.0'
+
+# $apiVersion = '' # '5.1' for Azure DevOps Services | '5.0' for Azure DevOps Server | '4.1' fro TFS 2018 
+$ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
+    -pat $pat -isOnline
+
+$buildId = 1216 # kv-infra-envs-build
+$tags = @('XYZ')
+$result = Add-BuildTags -buildId $buildId -tags $tags -context $ctx
+$result
+
+$tag = 'XYZ'
+$result = Remove-BuildTag -buildId $buildId -tag $tag -context $ctx
+$result
+
 Function HandleEx($ex) {
     Write-Host $ex
     $result = $ex.Response.GetResponseStream()

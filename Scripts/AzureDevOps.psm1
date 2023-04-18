@@ -86,6 +86,37 @@ return $buildDef
 }
 # . .\AzureDevOpsContext.ps1
 
+Function Add-BuildTags
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][int]$buildId,
+    [Parameter(Mandatory=$true)][string[]]$tags,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# POST https://dev.azure.com/{organization}/{project}/_apis/build/builds/{buildId}/tags?api-version=7.0
+
+$contentType = 'application/json'
+$buildTagUrl = $context.projectBaseUrl + '/build/builds/' + $buildId + '/tags?api-version=' + $context.apiVersion
+Write-Host $buildTagUrl
+
+$data = ConvertTo-Json -InputObject $tags
+$data
+
+if($context.isOnline) {
+    $result = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $buildTagUrl -Method Post -Body $data -ContentType $contentType
+}
+else {
+    $result = Invoke-RestMethod -Uri $buildTagUrl -UseDefaultCredentials -Method Post -Body $data -ContentType $contentType
+}
+
+return $result
+
+}
+# . .\AzureDevOpsContext.ps1
+
 Function Add-ClassificationNode
 {
     [CmdletBinding()]
@@ -4070,6 +4101,34 @@ return $result
 }
 # . .\AzureDevOpsContext.ps1
 
+Function Remove-BuildTag
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][int]$buildId,
+    [Parameter(Mandatory=$true)][string]$tag,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# PUT https://dev.azure.com/{organization}/{project}/_apis/build/builds/{buildId}/tags/{tag}?api-version=7.0
+
+$contentType = 'application/json'
+$buildTagUrl = $context.projectBaseUrl + '/build/builds/' + $buildId + '/tags/' + $tag + '?api-version=' + $context.apiVersion
+Write-Host $buildTagUrl
+
+if($context.isOnline) {
+    $result = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $buildTagUrl -Method Delete -ContentType $contentType
+}
+else {
+    $result = Invoke-RestMethod -Uri $buildTagUrl -UseDefaultCredentials -Method Delete -ContentType $contentType
+}
+
+return $result
+
+}
+# . .\AzureDevOpsContext.ps1
+
 Function Remove-GitRepo
 {
 param(
@@ -4934,6 +4993,44 @@ Set-Location $currentLocation
 }
 
 
+# . .\AzureDevOpsContext.ps1
+
+# this cmdlet uses the PATCH Build Update REST API which doesn't seem to work properly
+# use the Add Build Tag REST API instead:
+# https://learn.microsoft.com/en-us/rest/api/azure/devops/build/tags/add-build-tag?view=azure-devops-rest-7.0
+Function Set-PatchBuildTags
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][int]$buildId,
+    [Parameter(Mandatory=$true)][string[]]$tags,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+
+$contentType = 'application/json' # -patch+json'
+# PATCH https://dev.azure.com/{organization}/{project}/_apis/build/builds/{buildId}?api-version=7.1-preview.7
+$v = $context.apiVersion + '-preview.7'
+$buildUrl = $context.projectBaseUrl + '/build/builds/' + $buildId + '?api-version=' + $v
+Write-Host $buildUrl
+
+$data = @{ 
+    id = $buildId
+    tags = $tags 
+} | ConvertTo-Json
+$data
+
+if($context.isOnline) {
+    $build = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $buildUrl -Method Patch -Body $data -ContentType $contentType
+}
+else {
+    $build = Invoke-RestMethod -Uri $buildUrl -UseDefaultCredentials -Method Patch -Body $data -ContentType $contentType
+}
+
+return $build
+
+}
 # . .\AzureDevOpsContext.ps1
 # copy a task group to a destination org / project
 # requires source task groups to be loaded
