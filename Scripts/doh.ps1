@@ -359,6 +359,16 @@ $futureSprints | Sort-Object -Property { [DateTime]$_.attributes.startDate } | S
 }
 
 
+$svr = 'dev.azure.com';
+$org = 'daradu';
+$projName = 'dawr-demo';
+$pat = '***'
+$apiVersion = '7.0'
+
+# $apiVersion = '' # '5.1' for Azure DevOps Services | '5.0' for Azure DevOps Server | '4.1' fro TFS 2018 
+$ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
+    -pat $pat -isOnline
+
 # configure board columns
 $teamName = 'DoH'
 $boardName = 'Stories' # Features, Epics, depending on the Team configuration
@@ -378,7 +388,7 @@ description = ""
 columnType = "inProgress"
 #>
 
-$qaColumnId = $null # null for new columns, use existing ID for update
+$qaColumnId = "96cfa0d1-03a2-4934-ba01-2ac4744667d2" # $null # null for new columns, use existing ID for update
 $newBoardColumns = @(
     @{
         id = "63789f9b-2ba8-4643-8e42-d863b4031b73"
@@ -427,7 +437,7 @@ $newBoardColumns = @(
         name = "QA"
         itemLimit =  7
         stateMappings = @{
-                              "User Story" = "QA"
+                              "User Story" = "New" # "QA"
                           }
         isSplit =  $true
         description = ""
@@ -468,6 +478,7 @@ $newBoardColumns = @(
 $teamName = 'DoH'
 $boardName = 'Stories' # Features, Epics, depending on the Team configuration
 $response = Set-BoardColumns -teamName $teamName -boardName $boardName -columns $newBoardColumns -context $ctx
+$response
 
 $planId = 1590
 $suiteId = 1658
@@ -495,6 +506,24 @@ $result
 
 $tag = 'XYZ'
 $result = Remove-BuildTag -buildId $buildId -tag $tag -context $ctx
+$result
+
+
+
+# queue build
+
+$svr = 'dev.azure.com';
+$org = 'ZipZappAus';
+$projName = 'Demos';
+$pat = '***'
+$apiVersion = '7.0'
+
+# $apiVersion = '' # '5.1' for Azure DevOps Services | '5.0' for Azure DevOps Server | '4.1' fro TFS 2018 
+$ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
+    -pat $pat -isOnline
+
+$buildDefId = 313
+$result = Start-Build -buildDefId $buildDefId -context $ctx
 $result
 
 Function HandleEx($ex) {
