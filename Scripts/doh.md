@@ -760,3 +760,78 @@ $result = Start-Build -buildDefId $buildDefId -context $ctx
 $result
 ```
 
+## Pipeline retention leases
+
+Retention leases can be customised using the corresponding REST APIs:
+
+https://learn.microsoft.com/en-us/rest/api/azure/devops/build/leases?view=azure-devops-rest-7.0
+
+``` PowerShell
+$svr = 'dev.azure.com';
+$org = 'daradu';
+$projName = 'dawr-demo';
+$pat = '***'
+$apiVersion = '7.0'
+
+$ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
+    -pat $pat -isOnline
+
+# get user for ownerId = "User:<originId>"
+$users = Get-Users -context $ctx
+$user = $users.value | Where-Object { $_.principalName -eq 'daradu@microsoft.com' } | Select-Object -First 1
+
+# get build leases
+$runId = 30764
+$leases = Get-BuildLeases -buildId $runId -context $ctx
+$leases
+
+# get leases based on various params
+$definitionId = 78 # ETSDemo-CI
+$ownerId = "Pipeline:$($definitionId)"
+$repoId = 'f7d2e7aa-ce81-4607-8dbf-277cd1193320'
+$branchName = 'refs/heads/master'
+$ownerId = "Branch:$($repoId):$($branchName)"
+$ownerId = "User:$($user.originId)"
+$runId = 30601
+# can use a combination of:
+# - definitionId
+# - ownerId
+# - definitionId + ownerId
+# - definitionId + runId
+# - definitionId + ownerId + runId
+$leases = Get-Leases -context $ctx `
+-definitionId $definitionId `
+-runId $runId `
+-ownerId $ownerId
+$leases
+
+# get a single lease
+$leaseId = 1505 # 1472
+$lease = Get-Lease -leaseId $leaseId -context $ctx
+$lease
+
+# add a lease to an existing pipeline, run and owner
+# owner can be
+# - Pipeline:<pipelineId>
+# - Branch:<repoId>:<branchName>
+# - User:<userId>, usually originId fro AAD
+# - RM - release management
+$definitionId = 78 # ETSDemo-CI
+$runId = 30764
+$daysValid = 10
+$ownerId = "User:$($user.originId)" # "Pipeline:$($definitionId)" # "User:$($user.originId)"
+$response = Add-Lease -definitionId $definitionId -runId $runId -daysValid $daysValid -ownerId $ownerId -context $ctx
+$response
+
+# update lease (only daysValid and protectPipeline)
+$leaseId = 1505
+$daysValid = 20
+$lease = Set-Lease -leaseId $leaseId -daysValid $daysValid -context $ctx
+$lease
+
+# delete one or more leases
+$leaseIds = '1503,1504'
+$response = Remove-Leases -leaseIds $leaseIds -context $ctx
+$response
+```
+

@@ -46,6 +46,7 @@ $destRepos.value | ForEach-Object {
 # get all GIT repositories
 $repos = Get-GitRepos -context $srcCtx
 
+# *********************************************************
 # migrate GIT repositories
 $reposDir = "$($srcProjDir)\repos"
 New-Item -Path $reposDir -ItemType Directory -ErrorAction SilentlyContinue
@@ -66,6 +67,7 @@ git -c http.extraHeader="Authorization: Basic $($destCtx.base64AuthInfo)" push o
 Set-Location $currentLocation
 
 
+# *********************************************************
 # TFVC
 
 $srcWorkspace = 'daradu' # src collection
@@ -95,10 +97,12 @@ Copy-Item -Path "$srcTfvcProjDir\*" -Destination $destTfvcProjDir -Recurse -Forc
 Set-Location $currentLocation
 
 
+# *********************************************************
 # PRs migration
 
 
 
+# *********************************************************
 # get task groups
 $taskGroups = Get-TaskGroups -context $srcCtx
 $taskGroupsDir = "$($srcProjDir)\taskGroups"
@@ -181,6 +185,7 @@ $buildDef = Add-BuildDef -def $def -context $destCtx
 } # if $destRepo
 } # for each build def
 
+# *********************************************************
 # GIT branch policies
 # delete dest branch policies
 <#
@@ -231,7 +236,8 @@ $policies.value | ForEach-Object {
 }
 
 
-# Release defintions
+# *********************************************************
+# Release definitions
 # remove all dest release definitions
 <#
 $destReleaseDefs = Get-ReleaseDefs -context $relDestCtx
@@ -295,6 +301,7 @@ $releaseDefs.value | ForEach-Object {
 
 
 
+# *********************************************************
 # add iterations
 
 # Remove-Module AzureDevOps
@@ -369,6 +376,8 @@ $apiVersion = '7.0'
 $ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
     -pat $pat -isOnline
 
+
+# *********************************************************
 # configure board columns
 $teamName = 'DoH'
 $boardName = 'Stories' # Features, Epics, depending on the Team configuration
@@ -433,17 +442,6 @@ $newBoardColumns = @(
         columnType = "inProgress"
     },
     @{
-        id = $qaColumnId
-        name = "QA"
-        itemLimit =  7
-        stateMappings = @{
-                              "User Story" = "New" # "QA"
-                          }
-        isSplit =  $true
-        description = ""
-        columnType = "inProgress"
-    },
-    @{
         id = "bbc1cfa6-c479-4fea-9658-98684bfd5014"
         name = "Resolved"
         itemLimit =  5
@@ -462,6 +460,17 @@ $newBoardColumns = @(
                               "User Story" = "Prod"
                           }
         isSplit =  $false
+        description = ""
+        columnType = "inProgress"
+    },
+    @{
+        id = $qaColumnId
+        name = "QA"
+        itemLimit =  7
+        stateMappings = @{
+                              "User Story" = "QA" # "New" # "QA"
+                          }
+        isSplit =  $true
         description = ""
         columnType = "inProgress"
     },
@@ -487,6 +496,7 @@ $suite = Set-TestPlanSuite -planId $planId -suiteId $suiteId -queryString $query
 $suite
 
 
+# *********************************************************
 # tag build run
 
 $svr = 'dev.azure.com';
@@ -510,6 +520,7 @@ $result
 
 
 
+# *********************************************************
 # queue build
 
 $svr = 'dev.azure.com';
@@ -525,6 +536,77 @@ $ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -projec
 $buildDefId = 313
 $result = Start-Build -buildDefId $buildDefId -context $ctx
 $result
+
+
+# *********************************************************
+# pipeline retention leases
+$svr = 'dev.azure.com';
+$org = 'daradu';
+$projName = 'dawr-demo';
+$pat = '***'
+$apiVersion = '7.0'
+
+# $apiVersion = '' # '5.1' for Azure DevOps Services | '5.0' for Azure DevOps Server | '4.1' fro TFS 2018 
+$ctx = Get-AzureDevOpsContext -protocol https -coreServer $svr -org $org -project $projName -apiVersion $apiVersion `
+    -pat $pat -isOnline
+
+# get user for ownerId = "User:<originId>"
+$users = Get-Users -context $ctx
+$user = $users.value | Where-Object { $_.principalName -eq 'daradu@microsoft.com' } | Select-Object -First 1
+
+# get build leases
+$runId = 30764
+$leases = Get-BuildLeases -buildId $runId -context $ctx
+$leases
+
+# get leases based on various params
+$definitionId = 78 # ETSDemo-CI
+$ownerId = "Pipeline:$($definitionId)"
+$repoId = 'f7d2e7aa-ce81-4607-8dbf-277cd1193320'
+$branchName = 'refs/heads/master'
+$ownerId = "Branch:$($repoId):$($branchName)"
+$ownerId = "User:$($user.originId)"
+$runId = 30601
+# can use a combination of:
+# - definitionId
+# - ownerId
+# - definitionId + ownerId
+# - definitionId + runId
+# - definitionId + ownerId + runId
+$leases = Get-Leases -context $ctx `
+-definitionId $definitionId `
+-runId $runId `
+-ownerId $ownerId
+$leases
+
+# get a single lease
+$leaseId = 1505 # 1472
+$lease = Get-Lease -leaseId $leaseId -context $ctx
+$lease
+
+# add a lease to an existing pipeline, run and owner
+# owner can be
+# - Pipeline:<pipelineId>
+# - Branch:<repoId>:<branchName>
+# - User:<userId>, usually originId fro AAD
+# - RM - release management
+$definitionId = 78 # ETSDemo-CI
+$runId = 30764
+$daysValid = 10
+$ownerId = "User:$($user.originId)" # "Pipeline:$($definitionId)" # "User:$($user.originId)"
+$response = Add-Lease -definitionId $definitionId -runId $runId -daysValid $daysValid -ownerId $ownerId -context $ctx
+$response
+
+# update lease (only daysValid and protectPipeline)
+$leaseId = 1505
+$daysValid = 20
+$lease = Set-Lease -leaseId $leaseId -daysValid $daysValid -context $ctx
+$lease
+
+# delete one or more leases
+$leaseIds = '1503,1504'
+$response = Remove-Leases -leaseIds $leaseIds -context $ctx
+$response
 
 Function HandleEx($ex) {
     Write-Host $ex

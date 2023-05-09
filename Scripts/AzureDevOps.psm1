@@ -931,6 +931,48 @@ Set-Location $currentLocation
 
 # . .\AzureDevOpsContext.ps1
 
+Function Add-Lease
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][int]$definitionId,
+    [Parameter(Mandatory=$true)][int]$runId,
+    [Parameter(Mandatory=$true)][int]$daysValid,
+    # $ownerId = [Branch:<repoId:branch>, Pipeline:<pipelineId>, User:<userId>]
+    [Parameter(Mandatory=$true)][string]$ownerId, 
+    [Parameter()][switch]$protectPipeline,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+$contentType = 'application/json'
+
+# POST https://dev.azure.com/{organization}/{project}/_apis/build/retention/leases?api-version=7.0
+$leaseUrl = $context.projectBaseUrl + '/build/retention/leases?api-version=' + $context.apiVersion
+Write-Host $leaseUrl
+
+$lease = @(@{
+    definitionId = $definitionId
+    runId = $runId
+    daysValid = $daysValid
+    ownerId = $ownerId
+    protectPipeline = if($protectPipeline){$true}else{$false}
+})
+$data = ConvertTo-Json -InputObject $lease
+Write-Host $data
+
+if($context.isOnline) {
+    $leases = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $leaseUrl -Method Post -Body $data -ContentType $contentType
+}
+else {
+    $leases = Invoke-RestMethod -Uri $leaseUrl -UseDefaultCredentials -Method Post -Body $data -ContentType $contentType
+}
+
+return $leases
+
+}
+# . .\AzureDevOpsContext.ps1
+
 Function Add-PermissionsReport
 {
     [CmdletBinding()]
@@ -1874,6 +1916,31 @@ return $result
 }
 # . .\AzureDevOpsContext.ps1
 
+Function Get-BuildLeases
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][int]$buildId,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# GET https://dev.azure.com/{organization}/{project}/_apis/build/builds/{buildId}/leases?api-version=7.0
+$buildLeasesUrl = $context.projectBaseUrl + '/build/builds/' + $buildId + '/leases?api-version=' + $context.apiVersion
+Write-Host $buildLeasesUrl
+
+if($context.isOnline) {
+    $buildLeases = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $buildLeasesUrl -Method Get
+}
+else {
+    $buildLeases = Invoke-RestMethod -Uri $buildLeasesUrl -UseDefaultCredentials -Method Post
+}
+
+return $buildLeases
+
+}
+# . .\AzureDevOpsContext.ps1
+
 Function Get-ClassificationNodeByPath
 {
     [CmdletBinding()]
@@ -2422,6 +2489,65 @@ if($null -ne $descriptorObj.value -and $descriptorObj.value.length -gt 0) {
 }
 
 return $null
+
+}
+# . .\AzureDevOpsContext.ps1
+
+Function Get-Lease
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][int]$leaseId,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# GET https://dev.azure.com/{organization}/{project}/_apis/build/retention/leases?/{leaseId}api-version=7.0
+$leasesUrl = $context.projectBaseUrl + '/build/retention/leases/' + $leaseId + '?api-version=' + $context.apiVersion
+Write-Host $leasesUrl
+
+if($context.isOnline) {
+    $result = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $leasesUrl -Method Get
+}
+else {
+    $result = Invoke-RestMethod -Uri $leasesUrl -UseDefaultCredentials -Method Get
+}
+return $result
+
+}
+# . .\AzureDevOpsContext.ps1
+
+Function Get-Leases
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter()][int]$definitionId = 0,
+    [Parameter()][string]$ownerId = '',
+    [Parameter()][int]$runId = 0,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# GET https://dev.azure.com/{organization}/{project}/_apis/build/retention/leases?api-version=7.0
+$leasesUrl = $context.projectBaseUrl + '/build/retention/leases?api-version=' + $context.apiVersion
+if($definitionId -gt 0) {
+    $leasesUrl += '&definitionId=' + $definitionId
+}
+if(![string]::IsNullOrEmpty($ownerId)) {
+    $leasesUrl += '&ownerId=' + $ownerId
+}
+if($runId -gt 0) {
+    $leasesUrl += '&runId=' + $runId
+}
+Write-Host $leasesUrl
+
+if($context.isOnline) {
+    $result = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $leasesUrl -Method Get
+}
+else {
+    $result = Invoke-RestMethod -Uri $leasesUrl -UseDefaultCredentials -Method Get
+}
+return $result
 
 }
 # NOT WORKING WITH THE CONTEXT
@@ -4208,6 +4334,31 @@ return $response
 }
 # . .\AzureDevOpsContext.ps1
 
+Function Remove-Leases
+{
+    [CmdletBinding()]
+param(
+    # comma-separated list of Lease IDs
+    [Parameter()][string]$leaseIds,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+# DELETE https://dev.azure.com/{organization}/{project}/_apis/build/retention/leases?ids={ids}&api-version=7.0
+$leasesUrl = $context.projectBaseUrl + '/build/retention/leases?ids=' + $leaseIds + '&api-version=' + $context.apiVersion
+Write-Host $leasesUrl
+
+if($context.isOnline) {
+    $result = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $leasesUrl -Method Delete
+}
+else {
+    $result = Invoke-RestMethod -Uri $leasesUrl -UseDefaultCredentials -Method Delete
+}
+
+return $result
+
+}
+# . .\AzureDevOpsContext.ps1
+
 Function Remove-PoolAgentByName
 {
     [CmdletBinding()]
@@ -4993,6 +5144,42 @@ Set-Location $currentLocation
 }
 
 
+# . .\AzureDevOpsContext.ps1
+
+Function Set-Lease
+{
+    [CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [Parameter(Mandatory=$true)][int]$leaseId,
+    [Parameter(Mandatory=$true)][int]$daysValid,
+    [Parameter()][switch]$protectPipeline,
+    [Parameter(Mandatory=$true)][AzureDevOpsContext]$context
+)
+
+$contentType = 'application/json'
+
+# PATCH https://dev.azure.com/{organization}/{project}/_apis/build/retention/leases/{leaseId}?api-version=7.0
+$leaseUrl = $context.projectBaseUrl + '/build/retention/leases/' + $leaseId + '?api-version=' + $context.apiVersion
+Write-Host $leaseUrl
+
+$lease = @{
+    daysValid = $daysValid
+    protectPipeline = if($protectPipeline){$true}else{$false}
+}
+$data = ConvertTo-Json -InputObject $lease
+Write-Host $data
+
+if($context.isOnline) {
+    $lease = Invoke-RestMethod -Headers @{Authorization="Basic $($context.base64AuthInfo)"} -Uri $leaseUrl -Method Patch -Body $data -ContentType $contentType
+}
+else {
+    $lease = Invoke-RestMethod -Uri $leaseUrl -UseDefaultCredentials -Method Patch -Body $data -ContentType $contentType
+}
+
+return $lease
+
+}
 # . .\AzureDevOpsContext.ps1
 
 # this cmdlet uses the PATCH Build Update REST API which doesn't seem to work properly
